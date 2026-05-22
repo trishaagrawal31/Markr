@@ -1,34 +1,35 @@
+/* ========================================
+   Current Page Card - Clean Modern Style
+   ======================================== */
 .current-page-card {
-  background-color: var(--color-surface);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-lg);
   padding: var(--spacing-2xl);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xl);
-  box-shadow: var(--shadow-sm);
 }
 
 .current-page-card-header {
   display: flex;
   align-items: center;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-xl);
 }
 
 .current-page-card-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-md);
-  background: linear-gradient(135deg, var(--color-primary-glow), transparent);
+  background: var(--color-primary-muted);
   color: var(--color-primary);
-  border: 1px solid var(--color-primary);
 }
 
 .current-page-card-label {
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text);
 }
@@ -73,7 +74,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   padding: var(--spacing-xs) var(--spacing-md);
-  background-color: var(--color-surface-hover);
+  background: var(--color-surface-hover);
   border-radius: var(--radius-sm);
   margin-top: var(--spacing-xs);
 }
@@ -83,7 +84,7 @@
   color: var(--color-text-muted);
 }
 
-/* Loading placeholder shimmer */
+/* Loading placeholder */
 .current-page-card-title-placeholder,
 .current-page-card-description-placeholder,
 .current-page-card-url-placeholder {
@@ -92,61 +93,43 @@
   background: linear-gradient(
     90deg,
     var(--color-surface-hover) 25%,
-    var(--color-surface-elevated) 50%,
+    var(--color-border-light) 50%,
     var(--color-surface-hover) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
 }
 
-.current-page-card-title-placeholder {
-  width: 80%;
-}
-
-.current-page-card-description-placeholder {
-  width: 90%;
-  height: var(--spacing-xl);
-}
-
-.current-page-card-url-placeholder {
-  width: 60%;
-  height: var(--spacing-xl);
-}
+.current-page-card-title-placeholder { width: 80%; }
+.current-page-card-description-placeholder { width: 90%; height: var(--spacing-xl); }
+.current-page-card-url-placeholder { width: 60%; height: var(--spacing-xl); }
 
 @keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
-/* Status message inside card */
+/* Status message */
 .current-page-card-status {
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
   text-align: center;
   padding: var(--spacing-md) var(--spacing-xl);
-  background-color: var(--color-surface-hover);
+  background: var(--color-surface-hover);
   border-radius: var(--radius-md);
 }
 
 .current-page-card-status.success {
   color: var(--color-success);
-  background-color: var(--color-success-bg);
+  background: var(--color-success-bg);
 }
 
 .current-page-card-status.error {
   color: var(--color-error);
-  background-color: var(--color-error-bg);
+  background: var(--color-error-bg);
 }
 
-.current-page-card-status.loading {
-  color: var(--color-text-muted);
-}
-
-/* Actions area */
+/* Actions */
 .current-page-card-actions {
   display: flex;
   flex-direction: column;
