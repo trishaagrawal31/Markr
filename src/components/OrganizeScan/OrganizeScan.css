@@ -4,12 +4,12 @@
   gap: var(--spacing-xl);
 }
 
-/* Intro card — idle state */
+/* Intro card - idle state */
 .organize-scan-intro {
-  background-color: var(--color-white);
+  background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-  padding: var(--spacing-2xl);
+  padding: var(--spacing-3xl);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -21,29 +21,30 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-full);
-  background-color: transparent;
-  border: 1px solid var(--color-text);
-  color: var(--color-text);
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--color-primary-glow), transparent);
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
 }
 
 .organize-scan-intro-title {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text);
 }
 
 .organize-scan-intro-description {
   font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  line-height: var(--line-height-normal);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-relaxed);
+  max-width: 280px;
 }
 
-/* Selecting state — stats + tree */
+/* Selecting state - stats + tree */
 .organize-scan-stats {
-  background-color: var(--color-white);
+  background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   padding: var(--spacing-2xl);
@@ -71,11 +72,11 @@
   justify-content: center;
   flex-shrink: 0;
   color: var(--color-text-muted);
-  transition: color var(--transition-fast), transform var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 
 .organize-scan-rescan-btn:hover {
-  color: var(--color-text);
+  color: var(--color-primary);
   transform: rotate(180deg);
 }
 
@@ -89,4 +90,7 @@
   flex-direction: column;
   max-height: 340px;
   overflow-y: auto;
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-hover);
+  padding: var(--spacing-md);
 }

@@ -24,7 +24,7 @@
   justify-content: space-between;
   width: 100%;
   padding: var(--spacing-lg) var(--spacing-xl);
-  background-color: var(--color-white);
+  background-color: var(--color-surface);
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-md);
   font-family: var(--font-family);
@@ -36,7 +36,8 @@
 }
 
 .dropdown-trigger:hover:not(:disabled) {
-  border-color: var(--color-text-muted);
+  border-color: var(--color-primary);
+  background-color: var(--color-surface-hover);
 }
 
 .dropdown-trigger.placeholder .dropdown-trigger-text {
@@ -44,13 +45,13 @@
 }
 
 .dropdown-trigger.disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
 .dropdown-trigger.open {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 1px var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary), var(--shadow-glow);
 }
 
 .dropdown-trigger svg {
@@ -61,6 +62,7 @@
 
 .dropdown-trigger.open svg {
   transform: rotate(180deg);
+  color: var(--color-primary);
 }
 
 .dropdown-trigger-text {
@@ -75,9 +77,9 @@
   top: calc(100% + var(--spacing-xs));
   left: 0;
   right: 0;
-  background-color: var(--color-white);
+  background-color: var(--color-surface-elevated);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   z-index: 10;
   overflow-y: auto;
@@ -102,7 +104,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: var(--spacing-md) var(--spacing-xl);
+  padding: var(--spacing-lg) var(--spacing-xl);
   background: transparent;
   border: none;
   font-family: var(--font-family);
@@ -110,17 +112,19 @@
   font-weight: var(--font-weight-normal);
   color: var(--color-text);
   cursor: pointer;
-  transition: background-color var(--transition-fast);
+  transition: all var(--transition-fast);
   text-align: left;
 }
 
 .dropdown-option:hover {
-  background-color: var(--color-surface);
+  background-color: var(--color-surface-hover);
+  color: var(--color-primary);
 }
 
 .dropdown-option.selected {
   font-weight: var(--font-weight-medium);
   color: var(--color-primary);
+  background-color: var(--color-primary-glow);
 }
 
 .dropdown-option svg {

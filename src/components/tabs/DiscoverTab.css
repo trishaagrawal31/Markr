@@ -18,7 +18,7 @@
 
 .discover-sub-tab-button {
   font-size: var(--font-size-xs);
-  padding: var(--spacing-sm) var(--spacing-xl);
+  padding: var(--spacing-md) var(--spacing-2xl);
 }
 
 /* ========================================
@@ -27,8 +27,10 @@
 .discover-description {
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
-  line-height: var(--line-height-normal);
+  line-height: var(--line-height-relaxed);
   text-align: center;
+  max-width: 320px;
+  margin: 0 auto;
 }
 
 /* ========================================

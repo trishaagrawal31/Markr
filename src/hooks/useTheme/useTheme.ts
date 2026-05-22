@@ -6,7 +6,8 @@ const DARK_MEDIA_QUERY = '(prefers-color-scheme: dark)';
 
 const resolveTheme = (preference: ThemePreference): ResolvedTheme => {
   if (preference === 'system') {
-    return window.matchMedia(DARK_MEDIA_QUERY).matches ? 'dark' : 'light';
+    // Default to dark for modern UI
+    return 'dark';
   }
   return preference;
 };

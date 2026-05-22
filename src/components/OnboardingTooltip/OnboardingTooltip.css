@@ -5,7 +5,7 @@
 
 .onboarding-tooltip {
   position: relative;
-  background-color: var(--color-white);
+  background-color: var(--color-surface-elevated);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
@@ -33,7 +33,7 @@
   left: var(--spacing-2xl);
   width: 10px;
   height: 10px;
-  background-color: var(--color-white);
+  background-color: var(--color-surface-elevated);
   border-left: 1px solid var(--color-border);
   border-top: 1px solid var(--color-border);
   transform: rotate(45deg);

@@ -6,12 +6,12 @@
 .setup-guide-section {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--spacing-lg);
 }
 
 .setup-guide-heading {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text);
   margin: 0;
 }
@@ -26,12 +26,16 @@
 .setup-guide-reassurances {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
+  padding: var(--spacing-xl);
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
 }
 
 .setup-guide-reassurance-item {
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   margin: 0;
-  padding: var(--spacing-2xs) 0;
+  padding: var(--spacing-xs) 0;
 }

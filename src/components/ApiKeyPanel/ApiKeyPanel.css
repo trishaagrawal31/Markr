@@ -40,9 +40,10 @@
 
 /* Header */
 .api-key-panel-header {
-  padding: var(--spacing-lg) var(--spacing-xl);
+  padding: var(--spacing-xl) var(--spacing-2xl);
   border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-white);
+  background-color: var(--color-surface);
+  backdrop-filter: blur(12px);
 }
 
 .header-welcome,
@@ -55,17 +56,18 @@
 .header-left {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-lg);
 }
 
 .header-logo {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
 }
 
 .header-title {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text);
   line-height: var(--line-height-tight);
   letter-spacing: var(--letter-spacing-tight);
@@ -82,13 +84,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: var(--spacing-sm);
   color: var(--color-text-muted);
   text-decoration: none;
-  transition: color var(--transition-fast);
+  transition: all var(--transition-fast);
+  border-radius: var(--radius-md);
 }
 
 .header-star-link:hover {
   color: var(--color-warning);
+  background-color: var(--color-warning-bg);
 }
 
 .header-star-tooltip {
@@ -97,7 +102,7 @@
   right: 0;
   white-space: nowrap;
   font-size: var(--font-size-2xs);
-  color: var(--color-white);
+  color: #ffffff;
   background-color: var(--color-primary);
   padding: var(--spacing-xs) var(--spacing-md);
   border-radius: var(--radius-sm);
@@ -115,10 +120,10 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: var(--spacing-md) var(--spacing-xl);
-  padding-right: var(--spacing-lg);
+  padding: var(--spacing-2xl);
+  padding-right: var(--spacing-xl);
   overflow-y: auto;
-  gap: var(--spacing-md);
+  gap: var(--spacing-lg);
 }
 
 /* Thin Scrollbar */
@@ -148,8 +153,8 @@
 /* Welcome Message */
 .welcome-message {
   text-align: center;
-  margin-bottom: var(--spacing-xs);
-  padding: var(--spacing-xs) 0;
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-xl) 0;
 }
 
 .welcome-headline {
@@ -158,11 +163,15 @@
   color: var(--color-text);
   letter-spacing: var(--letter-spacing-tight);
   line-height: var(--line-height-tight);
-  margin-bottom: var(--spacing-2xs);
+  margin-bottom: var(--spacing-sm);
+  background: linear-gradient(135deg, var(--color-text), var(--color-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .welcome-subtext {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   font-weight: var(--font-weight-normal);
 }
@@ -193,25 +202,26 @@
 /* API Key Card */
 .api-key-card {
   position: relative;
-  background-color: var(--color-white);
+  background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-  padding: var(--spacing-xl);
+  padding: var(--spacing-2xl);
+  box-shadow: var(--shadow-sm);
 }
 
 .api-key-card-header {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
 }
 
 .api-key-icon {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-md);
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-text);
+  background: linear-gradient(135deg, var(--color-primary-glow), transparent);
+  border: 1px solid var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -219,9 +229,9 @@
 }
 
 .api-key-icon svg {
-  width: 16px;
-  height: 16px;
-  color: var(--color-text);
+  width: 18px;
+  height: 18px;
+  color: var(--color-primary);
 }
 
 .api-key-titles {
@@ -229,7 +239,7 @@
 }
 
 .api-key-title {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text);
   margin: 0;
@@ -243,13 +253,13 @@
 }
 
 .api-key-card input {
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
 }
 
 .api-key-actions {
   display: flex;
   gap: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
 }
 
 .btn-save {
@@ -270,8 +280,8 @@
   font-size: var(--font-size-2xs);
   color: var(--color-text-muted);
   margin: 0;
-  padding: var(--spacing-xs) var(--spacing-md);
-  background-color: var(--color-background);
+  padding: var(--spacing-md) var(--spacing-xl);
+  background-color: var(--color-surface-hover);
   border-radius: var(--radius-md);
 }
 
@@ -280,13 +290,17 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xl);
-  padding: var(--spacing-md) 0;
+  padding: var(--spacing-lg) 0;
 }
 
 .api-key-configured-badge {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-lg);
+  padding: var(--spacing-xl);
+  background-color: var(--color-success-bg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-success);
 }
 
 .api-key-configured-badge svg {
@@ -300,7 +314,7 @@
 }
 
 .api-key-configured-title {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text);
   margin: 0;
@@ -326,7 +340,7 @@
 }
 
 .api-key-change-link:hover {
-  color: var(--color-text);
+  color: var(--color-primary);
   text-decoration: underline;
 }
 
@@ -334,9 +348,9 @@
 .api-key-card-status {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--spacing-lg);
   align-items: center;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
 }
 
 .api-key-card-status .btn-go-to-app {
@@ -357,8 +371,8 @@
 /* Info Icon Tooltip */
 .api-key-card-info-trigger {
   position: absolute;
-  top: var(--spacing-lg);
-  right: var(--spacing-lg);
+  top: var(--spacing-xl);
+  right: var(--spacing-xl);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -373,7 +387,7 @@
 
 .api-key-card-info-trigger:hover,
 .api-key-card-info-trigger:focus-visible {
-  color: var(--color-warning);
+  color: var(--color-primary);
   outline: none;
 }
 
@@ -382,35 +396,37 @@
   top: calc(100% + var(--spacing-sm));
   right: 0;
   width: 220px;
-  padding: var(--spacing-lg);
-  background-color: var(--color-primary);
-  color: var(--color-white);
+  padding: var(--spacing-xl);
+  background-color: var(--color-surface-elevated);
+  color: var(--color-text);
   font-size: var(--font-size-xs);
   line-height: var(--line-height-relaxed);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
   z-index: 10;
 }
 
 /* Info Card */
 .info-card {
-  background-color: var(--color-white);
+  background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-  padding: var(--spacing-xl);
+  padding: var(--spacing-2xl);
 }
 
 .info-card-header {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
 }
 
 .info-card-icon-wrap {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-md);
-  background-color: transparent;
+  background-color: var(--color-success-bg);
   border: 1px solid var(--color-success);
   display: flex;
   align-items: center;
@@ -419,8 +435,8 @@
 }
 
 .info-card-icon-wrap svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   color: var(--color-success);
 }
 
@@ -429,7 +445,7 @@
 }
 
 .info-card-title {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
   margin: 0;
   color: var(--color-text);
@@ -451,17 +467,17 @@
 
 /* Danger Zone */
 .danger-zone {
-  background-color: var(--color-white);
+  background-color: var(--color-surface);
   border: 1px solid var(--color-error-bg-hover);
   border-radius: var(--radius-xl);
-  padding: var(--spacing-xl);
+  padding: var(--spacing-2xl);
 }
 
 .danger-zone-title {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-error-dark);
-  margin-bottom: var(--spacing-md);
+  color: var(--color-error);
+  margin-bottom: var(--spacing-lg);
 }
 
 .btn-danger-full {
@@ -481,7 +497,7 @@
   right: 0;
   white-space: nowrap;
   font-size: var(--font-size-2xs);
-  color: var(--color-white);
+  color: #ffffff;
   background-color: var(--color-primary);
   padding: var(--spacing-xs) var(--spacing-md);
   border-radius: var(--radius-sm);
@@ -494,5 +510,5 @@
   opacity: 1;
 }
 
-/* Step list classes are shared — see src/styles/index.css (.step-list-*) */
+/* Step list classes are shared - see src/styles/index.css (.step-list-*) */
 /* Setup guide view extracted to components/SetupGuide/ */

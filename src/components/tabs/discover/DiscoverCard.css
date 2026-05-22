@@ -5,17 +5,18 @@
   display: flex;
   gap: var(--spacing-xl);
   padding: var(--spacing-2xl);
-  background-color: var(--color-white);
+  background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   cursor: pointer;
-  transition: transform var(--transition-fast), background-color var(--transition-smooth);
+  transition: all var(--transition-fast);
 }
 
 .discover-card:hover {
   border-color: var(--color-primary);
-  background-color: var(--color-surface);
+  background-color: var(--color-surface-hover);
   transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
 }
 
 /* ========================================
@@ -25,26 +26,33 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
   border-radius: var(--radius-lg);
-  border: 1px solid var(--color-primary);
+  transition: all var(--transition-fast);
+}
+
+.discover-card:hover .discover-card-icon {
+  transform: scale(1.1);
 }
 
 .discover-card-icon-new-feature {
   background-color: var(--color-success-bg);
   color: var(--color-success);
+  border: 1px solid var(--color-success);
 }
 
 .discover-card-icon-update {
   background-color: var(--color-accent-purple-bg);
   color: var(--color-accent-purple);
+  border: 1px solid var(--color-accent-purple);
 }
 
 .discover-card-icon-coming-soon {
-  background-color: var(--color-success-bg);
-  color: var(--color-success);
+  background-color: var(--color-accent-cyan-bg);
+  color: var(--color-accent-cyan);
+  border: 1px solid var(--color-accent-cyan);
 }
 
 /* ========================================
@@ -53,7 +61,7 @@
 .discover-card-content {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm);
   min-width: 0;
 }
 
@@ -76,16 +84,19 @@
 .discover-card-badge-new-feature {
   background-color: var(--color-success-bg);
   color: var(--color-success);
+  border: 1px solid var(--color-success);
 }
 
 .discover-card-badge-update {
   background-color: var(--color-accent-purple-bg);
   color: var(--color-accent-purple);
+  border: 1px solid var(--color-accent-purple);
 }
 
 .discover-card-badge-coming-soon {
-  background-color: var(--color-success-bg);
-  color: var(--color-success);
+  background-color: var(--color-accent-cyan-bg);
+  color: var(--color-accent-cyan);
+  border: 1px solid var(--color-accent-cyan);
 }
 
 /* ========================================
@@ -101,13 +112,14 @@
   font-weight: var(--font-weight-semibold);
   color: var(--color-text);
   line-height: var(--line-height-tight);
-  padding-bottom: var(--spacing-xs);
-  border-bottom: 1px solid var(--color-primary);
-  display: inline-block;
+}
+
+.discover-card:hover .discover-card-title {
+  color: var(--color-primary);
 }
 
 .discover-card-description {
   font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  line-height: var(--line-height-normal);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-relaxed);
 }
