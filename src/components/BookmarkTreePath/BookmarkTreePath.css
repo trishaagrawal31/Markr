@@ -2,6 +2,10 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
+  padding: var(--spacing-xl);
+  background-color: var(--color-surface-hover);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
 }
 
 .bookmark-tree-path-label {
@@ -23,7 +27,7 @@
 
 .bookmark-tree-path-bookmark-title {
   font-weight: var(--font-weight-normal);
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -32,5 +36,8 @@
 .bookmark-tree-path-new-hint {
   font-size: var(--font-size-2xs);
   color: var(--color-success);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--spacing-2xs) var(--spacing-sm);
+  background-color: var(--color-success-bg);
+  border-radius: var(--radius-sm);
 }

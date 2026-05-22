@@ -4,7 +4,6 @@ import Button from '../Button/Button';
 import SetupGuide from '../SetupGuide/SetupGuide';
 import { useApiKeyPanel } from '../../hooks/apiKeyPanel';
 import {
-  StarIcon,
   ArrowLeftIcon,
   ArrowRightIcon,
   KeyIcon,
@@ -115,16 +114,6 @@ const ApiKeyPanel = ({
                     {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
                   </Button>
                 )}
-                <a
-                  href="https://github.com/Trisaagrawal31/Markr"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="header-star-link"
-                  aria-label="Star us on GitHub"
-                >
-                  <StarIcon width={14} height={14} />
-                  <span className="header-star-tooltip">Star us on GitHub</span>
-                </a>
               </div>
             </div>
           ) : (

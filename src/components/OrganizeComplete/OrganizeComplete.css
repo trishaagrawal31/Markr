@@ -2,33 +2,39 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-full);
-  background-color: transparent;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--color-success-bg), transparent);
   border: 1px solid var(--color-success);
   color: var(--color-success);
+  box-shadow: 0 0 24px var(--color-success-bg);
 }
 
 .organize-complete-stats {
   display: flex;
-  gap: var(--spacing-3xl);
+  gap: var(--spacing-4xl);
 }
 
 .organize-complete-stat {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-2xs);
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xl);
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  min-width: 80px;
 }
 
 .organize-complete-stat-value {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
 }
 
 .organize-complete-stat-label {
   font-size: var(--font-size-xs);
-  color: var(--color-text-light);
+  color: var(--color-text-muted);
 }
