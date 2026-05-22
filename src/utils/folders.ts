@@ -1,0 +1,164 @@
+import {
+  type ChromeBookmarkNode,
+  type FolderDataForAI,
+  type FolderDisplaySegment,
+  type FolderPathMap,
+} from '../types/bookmarks';
+import { getBookmarkTree } from '../services/bookmarks';
+
+interface TraversalStats {
+  maxDepth: number;
+  totalCount: number;
+}
+
+const getFolderChildren = (node: ChromeBookmarkNode): ChromeBookmarkNode[] => {
+  return (node.children ?? []).filter(child => !child.url && child.title);
+};
+
+const buildTreeLines = (
+  node: ChromeBookmarkNode,
+  parentPath: string,
+  prefix: string,
+  isLastChild: boolean,
+  depth: number,
+  lines: string[],
+  pathMap: FolderPathMap,
+  stats: TraversalStats
+): void => {
+  if (node.url || !node.title) {
+    return;
+  }
+
+  const folderName = node.title;
+  const escapedFolderName = folderName.replace(/\//g, '\\/');
+  const currentPath = [parentPath, escapedFolderName].filter(Boolean).join('/');
+
+  const connector = isLastChild ? '└── ' : '├── ';
+  lines.push(`${prefix}${connector}${folderName}`);
+  pathMap[currentPath] = node.id;
+
+  stats.totalCount += 1;
+  stats.maxDepth = Math.max(stats.maxDepth, depth);
+
+  const folderChildren = getFolderChildren(node);
+  const childPrefix = prefix + (isLastChild ? '    ' : '│   ');
+
+  folderChildren.forEach((child, index) => {
+    const isLast = index === folderChildren.length - 1;
+    buildTreeLines(child, currentPath, childPrefix, isLast, depth + 1, lines, pathMap, stats);
+  });
+};
+
+export const splitFolderPath = (path: string): string[] => {
+  return path.split(/(?<!\\)\//).map(segment => segment.replace(/\\\//g, '/'));
+};
+
+const MAX_VISIBLE_SEGMENTS = 3;
+
+export const getDisplaySegments = (folderPath: string): FolderDisplaySegment[] => {
+  const segments = splitFolderPath(folderPath).filter(Boolean);
+
+  if (segments.length === 0) {
+    return [];
+  }
+
+  if (segments.length <= MAX_VISIBLE_SEGMENTS) {
+    return segments.map((name, index) => ({
+      name,
+      isEllipsis: false,
+      depth: index,
+    }));
+  }
+
+  // Deep path: show first → ellipsis → last two (sequential depths for correct indentation)
+  return [
+    { name: segments[0], isEllipsis: false, depth: 0 },
+    { name: '\u22EF', isEllipsis: true, depth: 1 },
+    { name: segments[segments.length - 2], isEllipsis: false, depth: 2 },
+    { name: segments[segments.length - 1], isEllipsis: false, depth: 3 },
+  ];
+};
+
+/**
+ * Builds a complete id→path map from the raw Chrome bookmark tree.
+ * Traverses every folder in the tree so no folder ID can be missing.
+ * Paths include the Chrome container name (e.g. "Bookmarks bar/AI/Learning & Resources")
+ * so that stripRootSegment correctly removes the container prefix.
+ */
+export const buildFullIdToPathMapFromTree = (tree: ChromeBookmarkNode[]): Record<string, string> => {
+  const idToPathMap: Record<string, string> = {};
+
+  const traverse = (node: ChromeBookmarkNode, parentPath: string): void => {
+    if (node.url || !node.title) return;
+
+    const escapedTitle = node.title.replace(/\//g, '\\/');
+    const currentPath = parentPath ? `${parentPath}/${escapedTitle}` : escapedTitle;
+
+    idToPathMap[node.id] = currentPath;
+    (node.children ?? []).forEach(child => traverse(child, currentPath));
+  };
+
+  // tree[0] is the Chrome synthetic root — start from its direct children (the containers)
+  const rootNode = tree[0];
+  if (!rootNode?.children) return idToPathMap;
+  rootNode.children.forEach(container => traverse(container, ''));
+
+  return idToPathMap;
+};
+
+export const buildIdToPathMap = (pathToIdMap: FolderPathMap): Record<string, string> => {
+  const idToPathMap: Record<string, string> = {};
+  for (const [path, id] of Object.entries(pathToIdMap)) {
+    idToPathMap[id] = path;
+  }
+  return idToPathMap;
+};
+
+export const findFolderPathById = (idToPathMap: Record<string, string>, folderId: string): string | null => {
+  return idToPathMap[folderId] ?? null;
+};
+
+// AI returns unescaped paths (e.g. "DNS/DOMAIN") but pathToIdMap keys use escaped paths ("DNS\/DOMAIN")
+export const findFolderIdByAIPath = (aiPath: string, pathToIdMap: FolderPathMap): string | undefined => {
+  if (pathToIdMap[aiPath]) return pathToIdMap[aiPath];
+
+  for (const [escapedPath, folderId] of Object.entries(pathToIdMap)) {
+    const unescapedPath = splitFolderPath(escapedPath).join('/');
+    if (unescapedPath === aiPath) return folderId;
+  }
+
+  return undefined;
+};
+
+export const getFolderDataForAI = async (): Promise<FolderDataForAI> => {
+  const tree = await getBookmarkTree();
+
+  if (!tree || tree.length === 0) {
+    return { textTree: '', pathToIdMap: {}, idToPathMap: {}, defaultParentId: '', maxDepth: 0, totalFolderCount: 0 };
+  }
+
+  const rootNode = tree[0];
+  const rootChildren = rootNode.children ?? [];
+  const lines: string[] = [];
+  const pathToIdMap: FolderPathMap = {};
+  const stats: TraversalStats = { maxDepth: 0, totalCount: 0 };
+
+  // Use the first root folder (typically Bookmarks Bar) as default parent for new folders
+  const defaultParentId = rootChildren.length > 0 ? rootChildren[0].id : rootNode.id;
+
+  const rootFolders = getFolderChildren(rootNode);
+
+  rootFolders.forEach((child, index) => {
+    const isLast = index === rootFolders.length - 1;
+    buildTreeLines(child, '', '', isLast, 0, lines, pathToIdMap, stats);
+  });
+
+  return {
+    textTree: lines.join('\n'),
+    pathToIdMap,
+    idToPathMap: buildIdToPathMap(pathToIdMap),
+    defaultParentId,
+    maxDepth: stats.maxDepth,
+    totalFolderCount: stats.totalCount,
+  };
+};

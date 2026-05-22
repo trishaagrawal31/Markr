@@ -1,0 +1,36 @@
+.bookmark-tree-path {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.bookmark-tree-path-label {
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.bookmark-tree-path-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.bookmark-tree-path-bookmark-title {
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bookmark-tree-path-new-hint {
+  font-size: var(--font-size-2xs);
+  color: var(--color-success);
+  font-weight: var(--font-weight-medium);
+}

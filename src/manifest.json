@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "Markr",
+  "description": "Markr — Your AI Bookmark Manager",
+  "version": "2.0.0",
+  "icons": {
+    "16": "assets/icons/icon16.png",
+    "48": "assets/icons/icon48.png",
+    "128": "assets/icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_icon": {
+      "16": "assets/icons/icon16.png",
+      "48": "assets/icons/icon48.png",
+      "128": "assets/icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "src/background.ts",
+    "type": "module"
+  },
+  "permissions": [
+    "bookmarks",
+    "activeTab",
+    "storage",
+    "scripting",
+    "alarms"
+  ],
+  "host_permissions": [
+    "https://generativelanguage.googleapis.com/*",
+    "https://api.openai.com/*",
+    "https://api.anthropic.com/*",
+    "https://openrouter.ai/*"
+  ],
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ]
+}
