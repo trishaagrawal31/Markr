@@ -39,8 +39,8 @@ const MainContent = ({
   <HomeTab 
     onTabChange={handleTabChange}
     onOpenSettings={onOpenSettings} 
-    showCardTooltip={showOnboardingTooltips} // check if this is your variable name from above
-    onDismissCardTooltip={onTooltipsDismissed} // check if this is your variable name from above
+    showCardTooltip={showOnboardingTooltips}
+    onDismissCardTooltip={onTooltipsDismissed} 
   />
 )}
         {activeTab === 'organize' && <OrganizeTab />}

@@ -39,5 +39,4 @@ export interface ChatResponsePayload {
 
 export interface ApplyChatActionPayload {
   actionPreview: ActionPreviewData;
-  result?: BulkOrganizeResult;
 }

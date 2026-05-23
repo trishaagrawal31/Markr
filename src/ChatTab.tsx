@@ -14,7 +14,10 @@ const ChatTab = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
-      content: "Hi! I'm Markr AI. I can help you organize your bookmarks or open tabs. Try saying 'Organize all my open tabs into folders'.",
+      content: `I'm Markr AI, your bookmark organization engine. I can handle four types of powerful reorganization moves:
+
+
+Just describe what you want, and I'll generate a precise preview for your approval before making changes.`,
       timestamp: Date.now(),
       status: 'complete',
     },

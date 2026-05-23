@@ -1,5 +1,4 @@
 import { type CompactBookmark } from '../../types/organize';
-import { type FolderPathMap } from '../../types/bookmarks';
 
 /**
  * Markr Reasoning Engine - Interprets user intent and provides context for AI bookmark orchestration
@@ -16,43 +15,99 @@ export interface IntentContext {
 }
 
 /**
+ * Extracts the specific criteria the user is filtering by
+ * E.g., "React", "design", "PDF", "tutorials"
+ */
+const extractCriteria = (userMessage: string): string[] => {
+  const criteria: string[] = [];
+
+  // Look for quoted phrases
+  const quoted = userMessage.match(/"([^"]+)"/g);
+  if (quoted) {
+    criteria.push(...quoted.map(q => q.slice(1, -1)));
+  }
+
+  // Look for specific keywords
+  const keywords = [
+    'React', 'Vue', 'Angular', 'Python', 'Node', 'Go', 'Rust', 'Java',
+    'Design', 'Figma', 'Dribbble', 'Adobe', 'Sketch',
+    'PDF', 'Tutorial', 'Documentation', 'Article', 'Video',
+    'Shopping', 'Tools', 'SaaS', 'API', 'GitHub', 'Stack Overflow',
+    'CSS', 'HTML', 'JavaScript', 'TypeScript',
+    'Database', 'SQL', 'MongoDB', 'PostgreSQL',
+    'Productivity', 'Entertainment', 'Social', 'News', 'Reading'
+  ];
+
+  keywords.forEach(keyword => {
+    if (userMessage.toLowerCase().includes(keyword.toLowerCase())) {
+      criteria.push(keyword);
+    }
+  });
+
+  return [...new Set(criteria)]; // Remove duplicates
+};
+
+/**
  * Analyzes user message to detect which granular transition pattern they're asking for
  */
 export const detectIntentPattern = (userMessage: string): IntentContext => {
   const lower = userMessage.toLowerCase();
   const isTabOperation = lower.includes('tab') || lower.includes('open tab');
+  const extractedCriteria = extractCriteria(userMessage);
 
-  // SUB-SELECTION PATTERN: "Take just X out of Y" or "Extract X from Y"
+  // SUB-SELECTION PATTERN: "Take just X out of Y" or "Extract X from Y" or "Move X from Y"
   const subSelectionMatch = userMessage.match(
-    /(?:take|extract|move|get|pull|isolate)\s+(?:just|only|specific)\s+(.+?)\s+(?:out of|from)\s+(.+?)(?:\s+and|\s+to|$)/i
+    /(?:take|extract|move|get|pull|isolate|move only)\s+(?:just|only|specific|the)?\s*(.+?)\s+(?:out of|from|to|in)\s+(.+?)(?:\s+and|\s+folder|$)/i
   );
   if (subSelectionMatch) {
     const [, items, sourceFolder] = subSelectionMatch;
+    const itemsText = items.trim();
     return {
       pattern: 'sub-selection',
       sourceFolder: sourceFolder.trim(),
-      criteria: [items.trim()],
+      criteria: extractedCriteria.length > 0 ? extractedCriteria : [itemsText],
       isTabOperation,
-      guidance: `SUB-SELECTION: User wants to extract ONLY certain bookmarks from "${sourceFolder}".
-        Do NOT move everything in that folder — identify only the items matching "${items}" and leave others untouched.
-        Be surgical: match by title keywords, URL patterns, or semantic categories.`,
+      guidance: `SUB-SELECTION (STRICT FILTER): User wants to move ONLY "${itemsText}" from "${sourceFolder}".
+        DO NOT move everything in that folder.
+        MUST filter by: "${extractedCriteria.join(', ') || itemsText}"
+        Include ONLY bookmarks matching this criteria.
+        Leave ALL other items in source folder untouched.`,
+    };
+  }
+
+  // Alternative sub-selection: "Move React files to React folder"
+  const directSubSelection = userMessage.match(
+    /(?:move|put|place)\s+(?:my\s+)?(?:all\s+)?(.+?)\s+(?:to|into|in)\s+(?:a\s+)?(?:new\s+)?(.+?)\s+folder/i
+  );
+  if (directSubSelection && !lower.includes('loose') && !lower.includes('unsorted')) {
+    const [, items, destFolder] = directSubSelection;
+    return {
+      pattern: 'sub-selection',
+      destinationFolder: destFolder.trim(),
+      criteria: extractedCriteria.length > 0 ? extractedCriteria : [items.trim()],
+      isTabOperation,
+      guidance: `SUB-SELECTION (STRICT FILTER): User wants to move "${items.trim()}" to "${destFolder}".
+        MUST filter strictly by: "${extractedCriteria.join(', ') || items.trim()}"
+        DO NOT move unrelated items.
+        Include ONLY exact matches.`,
     };
   }
 
   // ROOT-TO-FOLDER PATTERN: "Group loose bookmarks" or "Organize my unsorted bookmarks"
-  if (lower.includes('loose') || lower.includes('unsorted') || lower.includes('root') || lower.includes('bar')) {
+  if (lower.includes('loose') || lower.includes('unsorted') || lower.includes('organize') && lower.includes('bookmark')) {
     return {
       pattern: 'root-to-folder',
       isTabOperation,
-      guidance: `ROOT-TO-FOLDER: User wants to organize bookmarks currently floating on the Bookmark Bar or root level.
-        Identify bookmarks that have currentFolderPath of "Bookmark Bar", "Other Bookmarks", or similar root locations.
-        Group them into context-specific folders based on their URLs and titles.`,
+      guidance: `ROOT-TO-FOLDER: User wants to organize scattered root-level bookmarks.
+        Find ONLY bookmarks in "Bookmark Bar" or "Other Bookmarks" with no parent folder.
+        Group by purpose/domain into category folders.
+        DO NOT reorganize bookmarks already in folders.`,
     };
   }
 
   // FOLDER-TO-FOLDER PATTERN: "Move X from FolderA to FolderB"
   const folderMoveMatch = userMessage.match(
-    /(?:move|transfer|relocate|place)\s+(.+?)\s+(?:from|out of)\s+(.+?)\s+(?:to|into)\s+(.+?)(?:\s+folder)?$/i
+    /(?:move|transfer|relocate|place)\s+(?:all\s+)?(.+?)\s+(?:from|out of)\s+(.+?)\s+(?:to|into)\s+(.+?)(?:\s+folder)?$/i
   );
   if (folderMoveMatch) {
     const [, items, sourceFolder, destFolder] = folderMoveMatch;
@@ -60,34 +115,39 @@ export const detectIntentPattern = (userMessage: string): IntentContext => {
       pattern: 'folder-to-folder',
       sourceFolder: sourceFolder.trim(),
       destinationFolder: destFolder.trim(),
-      criteria: [items.trim()],
+      criteria: extractedCriteria.length > 0 ? extractedCriteria : [items.trim()],
       isTabOperation,
-      guidance: `FOLDER-TO-FOLDER: User wants to move specific bookmarks from "${sourceFolder}" to "${destFolder}".
-        Find bookmarks currently in "${sourceFolder}" that match "${items}" criteria.
-        Move ONLY matched items; leave unrelated bookmarks in their source folder.`,
+      guidance: `FOLDER-TO-FOLDER: User wants to move "${items.trim()}" from "${sourceFolder}" to "${destFolder}".
+        MUST filter by criteria: "${extractedCriteria.join(', ') || items.trim()}"
+        Move ONLY matched items; leave unrelated items in source.`,
     };
   }
 
   // TAB-TO-FOLDER PATTERN: "Stash these tabs" or "Save open tabs to folder"
-  if (lower.includes('stash') || lower.includes('save') || (lower.includes('tab') && lower.includes('folder'))) {
+  if (lower.includes('stash') || (lower.includes('save') && lower.includes('tab'))) {
     const folderMatch = userMessage.match(/(?:to|into|in)\s+(?:a\s+)?(?:new\s+)?(.+?)\s+folder/i);
     const destFolder = folderMatch ? folderMatch[1].trim() : undefined;
     return {
       pattern: 'tab-to-folder',
       destinationFolder: destFolder || 'Saved Tabs',
+      criteria: extractedCriteria,
       isTabOperation: true,
-      guidance: `TAB-TO-FOLDER STASHING: User wants to convert specific open tabs into bookmarks in "${destFolder || 'Saved Tabs'}".
-        Only move tabs that match the user's criteria — leave unrelated open tabs alone.
-        Close the stashed tabs after moving them.`,
+      guidance: `TAB-TO-FOLDER STASHING: User wants to stash tabs to "${destFolder || 'Saved Tabs'}".
+        Convert ONLY tabs matching criteria: "${extractedCriteria.join(', ') || 'any matching tabs'}"
+        Leave unrelated tabs open.
+        Close ONLY the stashed tabs.`,
     };
   }
 
   // DEFAULT: General organization request
   return {
     pattern: 'general',
+    criteria: extractedCriteria,
     isTabOperation,
-    guidance: `GENERAL ORGANIZATION: User is asking for general bookmark reorganization.
-      Analyze their intent holistically and apply folder design rules to improve their structure.`,
+    guidance: extractedCriteria.length > 0
+      ? `FILTERED ORGANIZATION: User mentioned ${extractedCriteria.join(', ')}.
+        Focus on these items when organizing.`
+      : `GENERAL ORGANIZATION: Analyze holistically and apply folder design rules.`,
   };
 };
 

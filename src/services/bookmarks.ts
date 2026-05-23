@@ -84,27 +84,53 @@ export const moveBookmark = async (
   });
 };
 
+export const deleteBookmark = async (bookmarkId: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    chrome.bookmarks.remove(bookmarkId, () => {
+      if (chrome.runtime.lastError) {
+        reject(new Error(chrome.runtime.lastError.message));
+        return;
+      }
+      resolve();
+    });
+  });
+};
+
+export const deleteFolder = async (folderId: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    chrome.bookmarks.removeTree(folderId, () => {
+      if (chrome.runtime.lastError) {
+        reject(new Error(chrome.runtime.lastError.message));
+        return;
+      }
+      resolve();
+    });
+  });
+};
+
 export const createFolderPath = async (
   folderPath: string,
   pathToIdMap: FolderPathMap,
-  defaultParentId: string
+  defaultParentId?: string
 ): Promise<string> => {
-  const segments = folderPath.split('/');
-  let currentParentId = defaultParentId;
+  const segments = folderPath.split('/').filter(s => s.trim());
+  let currentParentId = defaultParentId || '2'; // Default to "Other Bookmarks" (root level)
   let resolvedPath = '';
 
   for (const segment of segments) {
+    if (!segment.trim()) continue;
+
     resolvedPath = resolvedPath ? `${resolvedPath}/${segment}` : segment;
 
+    // Check if path already exists
     if (pathToIdMap[resolvedPath]) {
       currentParentId = pathToIdMap[resolvedPath];
       continue;
     }
 
-    // AI sometimes omits root segments (e.g. "Utilities" instead of "Bookmarks Bar/Utilities")
-    // Only resolve when the match is unambiguous — avoids misfiling when multiple folders share a name
+    // Check for suffix matches (e.g., user said "React" but stored as "Coding/React")
     const suffixMatches = Object.entries(pathToIdMap).filter(
-      ([key]) => key.endsWith(`/${resolvedPath}`)
+      ([key]) => key.endsWith(`/${resolvedPath}`) && !key.includes('Bookmark Bar')
     );
 
     if (suffixMatches.length === 1) {
@@ -113,6 +139,7 @@ export const createFolderPath = async (
       continue;
     }
 
+    // Create new folder as child of current parent
     const newFolder = await createFolder(currentParentId, segment);
     currentParentId = newFolder.id;
     pathToIdMap[resolvedPath] = newFolder.id;

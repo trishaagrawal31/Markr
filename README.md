@@ -10,14 +10,10 @@
     <a href="https://github.com/migsilva89/Markr/issues">
       <img src="https://img.shields.io/github/issues/migsilva89/Markr" alt="Issues">
     </a>
-    <a href="https://github.com/migsilva89/Markr/blob/main/LICENSE">
-      <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
-    </a>
+    
   </p>
 
-  <a href="https://www.youtube.com/watch?v=9I5tpjMDrIQ">
-    <img src="https://img.shields.io/badge/Watch%20Demo-YouTube-red?style=for-the-badge&logo=youtube" alt="Watch on YouTube">
-  </a>
+  
 </div>
 
 ---
@@ -74,7 +70,7 @@ Markr uses AI to understand what you're saving and automatically organizes your 
 
 ### Install from Chrome Web Store
 
-1. [Add Markr from the Chrome Web Store](https://chromewebstore.google.com/detail/markr/bdobgdkpeffdbonfpokgkbncgnbnjnoo)
+1. [Add Markr from the Chrome Web Store]
 2. Click the Markr icon and choose your AI provider
 3. Enter your API key (get a free one from [Google AI Studio](https://aistudio.google.com/app/apikey))
 4. Start organizing!
@@ -85,8 +81,6 @@ Markr uses AI to understand what you're saving and automatically organizes your 
 
 1. Navigate to any page
 2. Click the Markr icon
-3. Hit "Organize" - AI suggests the best folder
-4. Accept, decline, or customize the suggestion
 
 **Bulk Organize:**
 
@@ -121,14 +115,6 @@ Markr uses AI to understand what you're saving and automatically organizes your 
 - **Chrome Manifest V3**
 - **CSS** with design tokens
 
-### Local Development
-
-```bash
-git clone https://github.com/migsilva89/Markr.git
-cd Markr
-npm install
-npm run dev       # Dev server with HMR
-npm run build     # Production build → dist/
 ```
 
 Load the extension:
@@ -162,15 +148,7 @@ src/
 ## Support
 
 - [Open an issue](https://github.com/migsilva89/MarkMind/issues) on GitHub
-- Email: <themarkmind@gmail.com>
-- Website: [markmind.xyz](https://markmind.xyz)
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-<div align="center">
-  <p>If you find Markr useful, consider <a href="https://github.com/migsilva89/Markr">giving it a star</a></p>
-</div>
+

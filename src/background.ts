@@ -4,10 +4,14 @@ import { organizeBookmarks } from './services/ai/bulkOrganize';
 import { saveOrganizeSession, loadOrganizeSession, getInitialSession } from './services/organizeSession';
 import { type ActionPreviewData, type ChatResponsePayload, type ApplyChatActionPayload } from './types/chat';
 import { moveBookmark, createFolderPath, getFullBookmarkLibrary } from './services/bookmarks';
-import { buildFullIdToPathMapFromTree } from './utils/folders';
+import { buildFullIdToPathMapFromTree, findFolderIdByAIPath } from './utils/folders';
+import { type BulkOrganizeResult } from './types/organize';
 
 const KEEPALIVE_ALARM_NAME = 'organize-keepalive';
 const KEEPALIVE_INTERVAL_MINUTES = 0.4;
+
+// Store the last chat action result for applying changes
+let lastChatActionResult: BulkOrganizeResult | null = null;
 
 const notifyPopup = (type: string, payload?: unknown): void => {
   chrome.runtime.sendMessage({ type, payload }).catch(() => {
@@ -122,7 +126,7 @@ const handleChatRequest = async (payload: ChatRequestPayload): Promise<void> => 
       payload.message.toLowerCase().includes('open') &&
       payload.message.toLowerCase().includes('tabs');
 
-    const bookmarksToAnalyze = includeOpenTabsOnly ? openTabBookmarks : allBookmarks;
+    const bookmarksToAnalyze = includeOpenTabsOnly ? openTabBookmarks : [...allBookmarks, ...openTabBookmarks];
 
     // Call AI with the comprehensive context
     const result = await organizeBookmarks(
@@ -134,6 +138,9 @@ const handleChatRequest = async (payload: ChatRequestPayload): Promise<void> => 
       payload.maxOutputTokens,
       payload.message
     );
+
+    // Store result for later application
+    lastChatActionResult = result;
 
     // Build ActionPreviewData from result
     const actionPreview = buildActionPreviewFromResult(result);
@@ -157,51 +164,118 @@ const handleChatRequest = async (payload: ChatRequestPayload): Promise<void> => 
 };
 
 const handleApplyChatAction = async (payload: ApplyChatActionPayload): Promise<void> => {
-  if (!payload.result) {
-    throw new Error('No organize result provided');
+  if (!payload.actionPreview || !lastChatActionResult) {
+    throw new Error('No action preview or result data available');
   }
 
-  const result = payload.result;
+  const { actionPreview } = payload;
   let appliedCount = 0;
   let skippedCount = 0;
 
-  // Get current pathToIdMap from bookmark tree
-  const tree = await chrome.bookmarks.getTree();
-  const idToPathMap = buildFullIdToPathMapFromTree(tree);
-  const pathToIdMap: Record<string, string> = {};
-  Object.entries(idToPathMap).forEach(([id, path]) => {
-    pathToIdMap[path] = id;
-  });
+  try {
+    // Get current tree and build fresh maps
+    const tree = await chrome.bookmarks.getTree();
+    const idToPathMap = buildFullIdToPathMapFromTree(tree);
 
-  // Apply each approved assignment
-  for (const assignment of result.assignments) {
-    if (!assignment.isApproved) {
-      skippedCount++;
-      continue;
-    }
+    // Build reverse map: path -> ID
+    const pathToIdMap: Record<string, string> = {};
+    Object.entries(idToPathMap).forEach(([id, path]) => {
+      pathToIdMap[path] = id;
+    });
 
-    try {
-      let targetFolderId = assignment.suggestedFolderId;
+    console.log('[ApplyAction] Starting apply action');
+    console.log('[ApplyAction] Total folders in tree:', Object.keys(idToPathMap).length);
 
-      // If folder doesn't exist (new folder), create it
-      if (!targetFolderId) {
-        targetFolderId = await createFolderPath(
-          assignment.suggestedPath,
+    // Step 1: Create any new folders that are needed
+    const foldersToCreate = actionPreview.foldersToCreate || [];
+    console.log('[ApplyAction] Folders to create:', foldersToCreate.length);
+
+    for (const folder of foldersToCreate) {
+      try {
+        // Check if folder already exists (try different path variations)
+        const existingId = findFolderIdByAIPath(folder.path, pathToIdMap);
+
+        if (existingId) {
+          console.log(`[ApplyAction] Folder already exists: ${folder.path} (ID: ${existingId})`);
+          continue;
+        }
+
+        console.log(`[ApplyAction] Creating folder: ${folder.path}`);
+        const folderId = await createFolderPath(
+          folder.path,
           pathToIdMap,
-          '1' // Default to Bookmarks Bar
+          undefined // Use default: "Other Bookmarks" (id: 2)
         );
+        console.log(`[ApplyAction] Created folder: ${folder.path} with ID: ${folderId}`);
+      } catch (error) {
+        console.error(`[ApplyAction] Failed to create folder ${folder.path}:`, error);
       }
-
-      // Move the bookmark
-      await moveBookmark(assignment.bookmarkId, targetFolderId);
-      appliedCount++;
-    } catch (error) {
-      console.error(`Failed to move bookmark ${assignment.bookmarkId}:`, error);
-      skippedCount++;
     }
-  }
 
-  notifyPopup('CHAT_ACTION_COMPLETE', { appliedCount, skippedCount });
+    // Refresh tree after folder creation
+    const updatedTree = await chrome.bookmarks.getTree();
+    const updatedIdToPathMap = buildFullIdToPathMapFromTree(updatedTree);
+    const updatedPathToIdMap: Record<string, string> = {};
+    Object.entries(updatedIdToPathMap).forEach(([id, path]) => {
+      updatedPathToIdMap[path] = id;
+    });
+
+    console.log('[ApplyAction] Total folders after creation:', Object.keys(updatedIdToPathMap).length);
+
+    // Step 2: Apply each bookmark move from the stored result
+    const affectedBookmarks = actionPreview.affectedBookmarks || [];
+    console.log('[ApplyAction] Bookmarks to move:', affectedBookmarks.length);
+
+    for (const bookmark of affectedBookmarks) {
+      try {
+        // Skip tabs as they're handled separately
+        if (bookmark.id.startsWith('tab-')) {
+          console.log(`[ApplyAction] Skipping tab: ${bookmark.id}`);
+          continue;
+        }
+
+        console.log(`[ApplyAction] Moving bookmark: "${bookmark.title}" from "${bookmark.currentPath}" to "${bookmark.suggestedPath}"`);
+
+        // Resolve the target folder ID
+        let targetFolderId = findFolderIdByAIPath(bookmark.suggestedPath, updatedPathToIdMap);
+
+        if (!targetFolderId) {
+          console.log(`[ApplyAction] Path not found in map, attempting to create: ${bookmark.suggestedPath}`);
+          // Try to create the folder path if it doesn't exist
+          targetFolderId = await createFolderPath(
+            bookmark.suggestedPath,
+            updatedPathToIdMap,
+            undefined
+          );
+          console.log(`[ApplyAction] Created and got folder ID: ${targetFolderId}`);
+        } else {
+          console.log(`[ApplyAction] Resolved path to folder ID: ${targetFolderId}`);
+        }
+
+        if (!targetFolderId) {
+          throw new Error(`Could not resolve folder ID for path: ${bookmark.suggestedPath}`);
+        }
+
+        // Move the bookmark
+        console.log(`[ApplyAction] Executing move: bookmark ${bookmark.id} → folder ${targetFolderId}`);
+        await moveBookmark(bookmark.id, targetFolderId);
+        console.log(`[ApplyAction] ✓ Successfully moved: ${bookmark.title}`);
+        appliedCount++;
+      } catch (error) {
+        console.error(`[ApplyAction] ✗ Failed to move bookmark "${bookmark.title}":`, error);
+        skippedCount++;
+      }
+    }
+
+    // Clear stored result after applying
+    lastChatActionResult = null;
+
+    console.log(`[ApplyAction] ✓ Complete: ${appliedCount} applied, ${skippedCount} skipped`);
+    notifyPopup('CHAT_ACTION_COMPLETE', { appliedCount, skippedCount });
+  } catch (error) {
+    console.error('[ApplyAction] Critical error:', error);
+    throw error;
+  }
 };
 
 const persistError = async (errorMessage: string): Promise<void> => {

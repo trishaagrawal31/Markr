@@ -73,10 +73,10 @@ const Onboarding = ({
     <div className="onboarding-welcome">
       <img
         src="/assets/icons/icon48.png"
-        alt="MarkMind"
+        alt="Markr"
         className="onboarding-welcome-logo"
       />
-      <h1 className="onboarding-welcome-title">Welcome to MarkMind</h1>
+      <h1 className="onboarding-welcome-title">Welcome to Markr</h1>
       <p className="onboarding-welcome-subtitle">
         Your bookmarks are about to get organized.
         Automatically. By AI. For free.
@@ -108,12 +108,12 @@ const Onboarding = ({
       {renderBackButton()}
       <h2 className="onboarding-explain-title">How does it work?</h2>
       <p className="onboarding-explain-text">
-        MarkMind uses AI to read your bookmarks and sort them into the right folders.
+        Markr uses AI to read your bookmarks and sort them into the right folders.
         We recommend starting with Google Gemini because it's completely free.
       </p>
       <p className="onboarding-explain-text">
         To connect, you need a special password called an API key.
-        Think of it like a Wi-Fi password that lets MarkMind talk to the AI.
+        Think of it like a Wi-Fi password that lets Markr talk to the AI.
       </p>
       <div className="onboarding-reassurances">
         <div className="onboarding-reassurance-item">
@@ -211,7 +211,7 @@ const Onboarding = ({
       <CheckCircleIcon width={48} height={48} className="onboarding-success-icon" />
       <h2 className="onboarding-success-title">You're all set!</h2>
       <p className="onboarding-success-subtitle">
-        MarkMind is connected and ready to organize your bookmarks.
+        Markr is connected and ready to organize your bookmarks.
       </p>
       <div className="onboarding-cta">
         <Button variant="primary" fullWidth onClick={handleNext}>
@@ -244,10 +244,10 @@ const Onboarding = ({
             <div className="header-left">
               <img
                 src="/assets/icons/icon48.png"
-                alt="MarkMind"
+                alt="Markr"
                 className="header-logo"
               />
-              <h1 className="header-title">MarkMind</h1>
+              <h1 className="header-title">Markr</h1>
             </div>
             <div className="header-right">
               <Button
