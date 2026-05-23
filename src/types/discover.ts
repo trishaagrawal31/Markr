@@ -1,5 +1,5 @@
 export type BadgeType = 'new-feature' | 'update' | 'coming-soon';
-export type ColorScheme = 'green' | 'purple' | 'orange';
+export type ColorScheme = 'green' | 'purple' | 'orange' | 'cyan';
 
 export interface DiscoverCard {
   id: string;

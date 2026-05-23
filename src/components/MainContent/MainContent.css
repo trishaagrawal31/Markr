@@ -1,0 +1,19 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Ensure the container takes full height of the popup */
+  width: 100%;
+  background-color: var(--color-bg-primary);
+}
+
+.tab-navigation-wrapper {
+  flex-shrink: 0; /* Prevent navigation from shrinking */
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.main-content {
+  flex-grow: 1; /* Allow main content to take remaining space */
+  overflow-y: auto; /* Enable scrolling for the main content area */
+  padding: 16px; /* Add padding to the content area */
+  background-color: var(--color-bg-primary);
+}

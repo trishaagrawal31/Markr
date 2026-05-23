@@ -4,6 +4,26 @@ export const getCurrentPageData = async (): Promise<PageMetadata | null> => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab?.id) throw new Error('No active tab found');
 
+  const currentUrl = tab.url || '';
+
+  // 1. Check for restricted browser schemes before executing script
+  const isRestricted = 
+    currentUrl.startsWith('chrome://') || 
+    currentUrl.startsWith('chrome-extension://') || 
+    currentUrl.startsWith('edge://') || // Good practice if supporting Edge
+    currentUrl.startsWith('https://chromewebstore.google.com');
+
+  if (isRestricted) {
+    return {
+      url: currentUrl,
+      title: tab.title || '',
+      favIconUrl: tab.favIconUrl || null,
+      description: null,
+      keywords: null,
+      h1: null,
+    };
+  }
+
   try {
     const [{ result }] = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
@@ -58,9 +78,12 @@ export const getCurrentPageData = async (): Promise<PageMetadata | null> => {
   } catch (error) {
     console.error('Failed to execute script on page, using fallback:', error);
     return {
-      url: tab.url || '',
+      url: currentUrl,
       title: tab.title || '',
-      favIconUrl: tab.favIconUrl,
+      favIconUrl: tab.favIconUrl || null,
+      description: null,
+      keywords: null,
+      h1: null,
     };
   }
 };

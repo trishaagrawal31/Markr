@@ -16,8 +16,14 @@ export const StarIcon = ({ className = 'star-icon', width = 14, height = 14 }: I
   </svg>
 );
 
-export const ArrowLeftIcon = () => (
-  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+export const ArrowLeftIcon = ({ width = 14, height = 14 }: IconProps) => (
+  <svg
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    width={width}
+    height={height}
+  >
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -83,8 +89,14 @@ export const WarningIcon = ({ width = 12, height = 12 }: IconProps) => (
   </svg>
 );
 
-export const SettingsIcon = () => (
-  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+export const SettingsIcon = ({ width = 14, height = 14 }: IconProps) => (
+  <svg
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    width={width}
+    height={height}
+  >
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -222,8 +234,9 @@ export const HomeIcon = ({ width = 14, height = 14 }: IconProps) => (
   </svg>
 );
 
-export const SparklesIcon = ({ width = 14, height = 14 }: IconProps) => (
+export const SparklesIcon = ({ className, width = 14, height = 14 }: IconProps) => (
   <svg
+    className={className}
     fill="none"
     stroke="currentColor"
     viewBox="0 0 24 24"
@@ -443,6 +456,41 @@ export const BookOpenIcon = ({ width = 14, height = 14 }: IconProps) => (
   </svg>
 );
 
+export const MessageSquareIcon = ({ className, width = 14, height = 14 }: IconProps) => (
+  <svg
+    className={className}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    width={width}
+    height={height}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z"
+    />
+  </svg>
+);
+
+export const SendIcon = ({ width = 14, height = 14 }: IconProps) => (
+  <svg
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    width={width}
+    height={height}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      d="M2 12L22 2l-10 20-2-8-8-2z"
+    />
+  </svg>
+);
+
 export const ExternalLinkIcon = ({ width = 14, height = 14 }: IconProps) => (
   <svg
     fill="none"
@@ -524,3 +572,36 @@ export const HeartIcon = ({ width = 14, height = 14 }: IconProps) => (
   </svg>
 );
 
+export const XCircleIcon = ({ width = 14, height = 14 }: IconProps) => (
+  <svg
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    width={width}
+    height={height}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+    />
+  </svg>
+);
+
+export const FolderPlusIcon = ({ width = 14, height = 14 }: IconProps) => (
+  <svg
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    width={width}
+    height={height}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      d="M12 6v6m0 0v6m0-6h6m-6 0H6M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+    />
+  </svg>
+);

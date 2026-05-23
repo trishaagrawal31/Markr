@@ -94,11 +94,17 @@ export const organizeBookmarks = async (
   bookmarks: CompactBookmark[],
   folderTree: string,
   pathToIdMap: FolderPathMap,
-  maxOutputTokens?: number
+  maxOutputTokens?: number,
+  userInstructions?: string
 ): Promise<BulkOrganizeResult> => {
   const resolvedTokens = maxOutputTokens ?? await lookupMaxOutputTokens(serviceId, modelId);
   const apiKey = await getApiKey(serviceId);
-  const userPrompt = buildBulkOrganizeUserPrompt(bookmarks, folderTree);
+  
+  let userPrompt = buildBulkOrganizeUserPrompt(bookmarks, folderTree);
+
+  if (userInstructions && userInstructions.trim()) {
+    userPrompt += `\n\nIMPORTANT: Follow these additional user instructions for organization:\n"${userInstructions.trim()}"`;
+  }
 
   const responseText = await callProvider(
     serviceId,

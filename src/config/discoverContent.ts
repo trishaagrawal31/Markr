@@ -5,8 +5,6 @@ import {
   type PartnerApp,
 } from '../types/discover';
 
-export const MARKR_BLOG_URL = 'https://www.markr.xyz/blog';
-
 export const DISCOVER_SUB_TABS: DiscoverSubTab[] = [
   {
     id: 'whats-new',
@@ -173,27 +171,18 @@ export const QUICK_ACTIONS: QuickActionItem[] = [
   {
     id: 'organize',
     title: 'Organize',
-    description: 'Select bookmarks and let AI sort them into the perfect folders automatically.',
+    description: 'Use AI to automatically sort your bookmarks into the perfect folders.',
     iconName: 'folder',
     colorScheme: 'green',
     targetTab: 'organize',
   },
   {
-    id: 'discover',
-    title: 'Discover',
-    description: 'Explore new features, pro tips, and hand-picked extensions from friends.',
-    iconName: 'compass',
-    colorScheme: 'purple',
-    targetTab: 'discover',
-  },
-  {
-    id: 'blog',
-    title: 'Blog',
-    description: 'Read articles, tips, and stories about organizing your digital life.',
-    iconName: 'bookOpen',
-    colorScheme: 'purple',
-    targetTab: 'blog',
-    externalUrl: MARKR_BLOG_URL,
+    id: 'chat',
+    title: 'Chat',
+    description: 'Instruct the AI on exactly how you want your bookmarks organized.',
+    iconName: 'messageSquare',
+    colorScheme: 'cyan',
+    targetTab: 'chat',
   },
   {
     id: 'settings',

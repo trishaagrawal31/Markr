@@ -1,4 +1,6 @@
 import { type ChromeBookmarkNode, type FolderPathMap } from '../types/bookmarks';
+import { type CompactBookmark } from '../types/organize';
+import { flattenAllBookmarks } from '../utils/bookmarkScanner';
 
 export const getBookmarkTree = async (): Promise<ChromeBookmarkNode[]> => {
   return new Promise((resolve, reject) => {
@@ -117,4 +119,36 @@ export const createFolderPath = async (
   }
 
   return currentParentId;
+};
+
+// Get all bookmarks in the library (not just open tabs)
+export const getFullBookmarkLibrary = async (
+  idToPathMap?: Record<string, string>
+): Promise<CompactBookmark[]> => {
+  const tree = await getBookmarkTree();
+  const pathMap = idToPathMap || buildIdToPathMap(tree);
+  return flattenAllBookmarks(tree, pathMap);
+};
+
+// Build ID to path mapping from tree
+const buildIdToPathMap = (tree: ChromeBookmarkNode[]): Record<string, string> => {
+  const map: Record<string, string> = {};
+
+  const traverse = (node: ChromeBookmarkNode, path: string) => {
+    if (node.id) {
+      map[node.id] = path || 'Root';
+    }
+    if (node.children) {
+      node.children.forEach(child => {
+        const childPath = path ? `${path}/${child.title || 'Unnamed'}` : (child.title || 'Unnamed');
+        traverse(child, childPath);
+      });
+    }
+  };
+
+  tree.forEach(node => {
+    traverse(node, node.title || 'Root');
+  });
+
+  return map;
 };
