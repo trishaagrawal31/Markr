@@ -81,6 +81,28 @@ const ActionPreview: React.FC<ActionPreviewProps> = ({
           </div>
         )}
 
+        {/* Folder Operations Section */}
+        {actionPreview.folderOperations && actionPreview.folderOperations.length > 0 && (
+          <div className="action-preview-section">
+            <div className="section-header">
+              <span className="section-label">🗑️ Folder Operations</span>
+              <span className="section-count">{actionPreview.folderOperations.length}</span>
+            </div>
+            <div className="folders-list">
+              {actionPreview.folderOperations.map((op, idx) => (
+                <div key={idx} className="folder-item">
+                  <div className="folder-path">
+                    {op.operation === 'delete' ? '🗑️ Delete' : '📂 Unpack'} {op.folderPath}
+                  </div>
+                  {op.description && (
+                    <div className="folder-description">{op.description}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Summary */}
         <div className="action-preview-summary">
           <p>{actionPreview.summary}</p>

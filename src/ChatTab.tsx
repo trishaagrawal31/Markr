@@ -14,8 +14,13 @@ const ChatTab = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
-      content: `I'm Markr AI, your bookmark organization engine. I can handle four types of powerful reorganization moves:
+      content: `I'm Markr AI, your bookmark organization engine. I can handle five powerful operations:
 
+1. **Move Bookmarks** - Organize bookmarks into folders (existing or new)
+2. **Create Folders** - Set up new folder structures as needed
+3. **Unpack Folders** - Move folder contents to parent and delete the empty folder
+4. **Delete Folders** - Remove folders and their contents
+5. **Smart Filtering** - Handle specific sub-selections by criteria (React, design, tools, etc.)
 
 Just describe what you want, and I'll generate a precise preview for your approval before making changes.`,
       timestamp: Date.now(),

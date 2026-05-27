@@ -41,9 +41,16 @@ export interface BookmarkAssignment {
   isApproved: boolean;
 }
 
+export interface FolderOp {
+  folderPath: string;
+  operation: 'delete' | 'unpack';
+  description: string;
+}
+
 export interface BulkOrganizeResult {
   folderPlan: FolderPlan;
   assignments: BookmarkAssignment[];
+  folderOperations?: FolderOp[];
 }
 
 export interface FolderTreeNode {

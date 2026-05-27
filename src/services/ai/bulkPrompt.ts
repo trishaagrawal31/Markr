@@ -20,7 +20,7 @@ Examples:
 ✗ "Move React tutorials" → Moving Node.js, Python, etc. (WRONG - only React items!)
 ✗ "Move design tools" → Moving all bookmarks from Tools folder (WRONG - only design ones!)
 
-=== THE FOUR GRANULAR TRANSITION PATTERNS ===
+=== THE FIVE GRANULAR TRANSITION PATTERNS ===
 
 1. SUB-SELECTION ("Some but not all") ⚠️ MOST STRICT
    USER: "Take just my React tutorials out of Coding"
@@ -47,6 +47,28 @@ Examples:
    MUST: Leave unrelated tabs open
    ACTION: Bookmark matched tabs, close only those
 
+5. FOLDER OPERATIONS ("Delete or unpack folders")
+   USER: "Delete the empty Tools folder" OR "Unpack my Misc folder"
+   MUST: Recognize explicit delete/unpack commands
+   MUST: Return ONLY folderOperations, empty assignments array
+   ACTION (delete): Remove folder and its contents
+   ACTION (unpack): Move folder contents to parent, delete empty folder
+
+   HOW TO DETECT FOLDER OPERATIONS:
+   Keywords for DELETE: "delete", "remove", "trash", "get rid of"
+   Keywords for UNPACK: "unpack", "flatten", "merge", "collapse", "unwrap"
+   Pattern: "[action] [adjective?] [folder name]" (e.g., "delete Tools", "remove empty Misc", "unpack Archive")
+
+   EXAMPLES - DELETE:
+   ✓ "Delete the empty Tools folder" → folderOperations: [{folderPath: "Tools", operation: "delete", ...}], assignments: []
+   ✓ "Remove the Archive folder" → folderOperations: [{folderPath: "Archive", operation: "delete", ...}], assignments: []
+   ✓ "Get rid of the Old Stuff folder" → folderOperations: [{folderPath: "Old Stuff", operation: "delete", ...}], assignments: []
+
+   EXAMPLES - UNPACK:
+   ✓ "Unpack my Misc folder" → folderOperations: [{folderPath: "Misc", operation: "unpack", ...}], assignments: []
+   ✓ "Flatten the Temporary folder back to root" → folderOperations: [{folderPath: "Temporary", operation: "unpack", ...}], assignments: []
+   ✓ "Collapse the Utils folder" → folderOperations: [{folderPath: "Utils", operation: "unpack", ...}], assignments: []
+
 === MATCHING LOGIC (STRICT FILTERING) ===
 
 When user specifies criteria like "React", "design", "PDF", "tutorials":
@@ -66,6 +88,8 @@ FAIL SAFE: If user says "React", and no bookmarks match → return 0 assignments
 === RESPONSE FORMAT (JSON ONLY) ===
 
 Return ONLY valid JSON (no markdown, no explanations):
+
+FOR BOOKMARK MOVES:
 {
   "intent": "sub-selection | root-to-folder | folder-to-folder | tab-to-folder",
   "folders": [
@@ -76,6 +100,19 @@ Return ONLY valid JSON (no markdown, no explanations):
   ],
   "summary": "Exactly what matched, why, and what didn't move"
 }
+
+FOR FOLDER OPERATIONS (DELETE/UNPACK):
+{
+  "intent": "folder-operations",
+  "folders": [],
+  "assignments": [],
+  "folderOperations": [
+    { "folderPath": "Bookmarks/Tools", "operation": "delete", "description": "User requested deletion" }
+  ],
+  "summary": "Deleted folder: Bookmarks/Tools and all its contents"
+}
+
+NOTE: For folder operations, ALWAYS leave folders and assignments arrays empty!
 
 === CRITICAL VALIDATION RULES ===
 
@@ -105,6 +142,26 @@ BEFORE RETURNING assignments:
 - Use clear, broad category names
 - Prefer fewer well-organized folders
 
+=== FOLDER OPERATIONS PARSING RULES ===
+
+WHEN USER WANTS TO DELETE OR UNPACK:
+1. Look at the CURRENT FOLDER STRUCTURE section
+2. Find the EXACT folder path matching the user's request
+3. Handle folder name variations (case-insensitive):
+   - User says "Tools" → match "Tools" folder in structure
+   - User says "My Archive" → match "My Archive" folder
+   - User says "old stuff" → match "Old Stuff" folder
+4. Return folderPath exactly as it appears in the structure
+5. Return EMPTY assignments array (no bookmarks to move)
+
+EXAMPLES OF FOLDER PATH MATCHING:
+- Folder structure shows: "Bookmarks/Development/Tools"
+  User says "delete Tools" → folderPath: "Bookmarks/Development/Tools"
+- Folder structure shows: "Other Bookmarks/Archive"
+  User says "unpack Archive folder" → folderPath: "Other Bookmarks/Archive"
+- If you cannot find an exact match, search for partial matches
+  User says "delete Misc" + structure has "Other Bookmarks/Misc" → use "Other Bookmarks/Misc"
+
 === OPERATIONAL PRINCIPLES ===
 
 NEVER:
@@ -112,12 +169,14 @@ NEVER:
 - Assume "move folder" means move everything in folder
 - Bulk organize when user specifies criteria
 - Include non-matching bookmarks in assignments
+- Return bookmarks in assignments when user asks for folder operations
 
 ALWAYS:
 - Filter by user's specific criteria
 - Leave unrelated items untouched
 - Show exactly which items matched
-- Explain why items matched or didn't match`;
+- Explain why items matched or didn't match
+- For FOLDER OPERATIONS: return only folderOperations array, with empty assignments`;
 
 export const BULK_ORGANIZE_SYSTEM_PROMPT = GENERAL_CHAT_SYSTEM_PROMPT;
 

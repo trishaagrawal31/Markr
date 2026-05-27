@@ -3,7 +3,7 @@ import { type OrganizeSession } from './types/organize';
 import { organizeBookmarks } from './services/ai/bulkOrganize';
 import { saveOrganizeSession, loadOrganizeSession, getInitialSession } from './services/organizeSession';
 import { type ActionPreviewData, type ChatResponsePayload, type ApplyChatActionPayload } from './types/chat';
-import { moveBookmark, createFolderPath, getFullBookmarkLibrary } from './services/bookmarks';
+import { moveBookmark, createFolderPath, getFullBookmarkLibrary, deleteFolder, unpacking, getBookmarkById } from './services/bookmarks';
 import { buildFullIdToPathMapFromTree, findFolderIdByAIPath } from './utils/folders';
 import { type BulkOrganizeResult } from './types/organize';
 
@@ -37,11 +37,21 @@ const buildActionPreviewFromResult = (
     suggestedPath: a.suggestedPath,
   }));
 
+  const folderOperations = result.folderOperations
+    ? result.folderOperations.map(op => ({
+        folderId: '',
+        folderPath: op.folderPath,
+        operation: op.operation,
+        description: op.description,
+      }))
+    : undefined;
+
   return {
     foldersToCreate,
     affectedBookmarks,
+    folderOperations,
     summary: result.folderPlan.summary,
-    canApprove: affectedBookmarks.length > 0,
+    canApprove: affectedBookmarks.length > 0 || (folderOperations?.length ?? 0) > 0,
   };
 };
 
@@ -222,7 +232,51 @@ const handleApplyChatAction = async (payload: ApplyChatActionPayload): Promise<v
 
     console.log('[ApplyAction] Total folders after creation:', Object.keys(updatedIdToPathMap).length);
 
-    // Step 2: Apply each bookmark move from the stored result
+    // Step 2: Apply folder operations (delete/unpack) before moving bookmarks
+    const folderOperations = actionPreview.folderOperations || [];
+    console.log('[ApplyAction] Folder operations to apply:', folderOperations.length);
+
+    for (const op of folderOperations) {
+      try {
+        const folderId = findFolderIdByAIPath(op.folderPath, updatedPathToIdMap);
+        if (!folderId) {
+          console.log(`[ApplyAction] Folder not found: ${op.folderPath}`);
+          continue;
+        }
+
+        if (op.operation === 'delete') {
+          console.log(`[ApplyAction] Deleting folder: ${op.folderPath}`);
+          await deleteFolder(folderId);
+          console.log(`[ApplyAction] ✓ Successfully deleted: ${op.folderPath}`);
+        } else if (op.operation === 'unpack') {
+          console.log(`[ApplyAction] Unpacking folder: ${op.folderPath}`);
+          // Get the parent ID
+          const folder = await getBookmarkById(folderId);
+          if (!folder?.parentId) {
+            throw new Error(`Could not find parent for folder: ${op.folderPath}`);
+          }
+          await unpacking(folderId, folder.parentId);
+          console.log(`[ApplyAction] ✓ Successfully unpacked: ${op.folderPath}`);
+        }
+      } catch (error) {
+        console.error(`[ApplyAction] Failed to ${op.operation} folder ${op.folderPath}:`, error);
+      }
+    }
+
+    // Refresh tree after folder operations
+    if (folderOperations.length > 0) {
+      const refreshedTree = await chrome.bookmarks.getTree();
+      const refreshedIdToPathMap = buildFullIdToPathMapFromTree(refreshedTree);
+      const refreshedPathToIdMap: Record<string, string> = {};
+      Object.entries(refreshedIdToPathMap).forEach(([id, path]) => {
+        refreshedPathToIdMap[path] = id;
+      });
+      // Update the maps for bookmark moves
+      Object.assign(updatedIdToPathMap, refreshedIdToPathMap);
+      Object.assign(updatedPathToIdMap, refreshedPathToIdMap);
+    }
+
+    // Step 3: Apply each bookmark move from the stored result
     const affectedBookmarks = actionPreview.affectedBookmarks || [];
     console.log('[ApplyAction] Bookmarks to move:', affectedBookmarks.length);
 

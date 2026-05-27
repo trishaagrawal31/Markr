@@ -1,5 +1,12 @@
 import { type BulkOrganizeResult } from './organize';
 
+export interface FolderOperation {
+  folderId: string;
+  folderPath: string;
+  operation: 'delete' | 'unpack';
+  description: string;
+}
+
 export interface ActionPreviewData {
   foldersToCreate: Array<{
     path: string;
@@ -12,6 +19,7 @@ export interface ActionPreviewData {
     currentPath: string;
     suggestedPath: string;
   }>;
+  folderOperations?: FolderOperation[];
   summary: string;
   canApprove: boolean;
 }

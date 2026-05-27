@@ -108,6 +108,24 @@ export const deleteFolder = async (folderId: string): Promise<void> => {
   });
 };
 
+export const unpacking = async (
+  folderId: string,
+  parentFolderId: string
+): Promise<void> => {
+  const folder = await getBookmarkById(folderId);
+  if (!folder || !folder.children) {
+    throw new Error('Folder not found or has no contents');
+  }
+
+  // Move all children to parent folder
+  for (const child of folder.children) {
+    await moveBookmark(child.id, parentFolderId);
+  }
+
+  // Delete the now-empty folder
+  await deleteFolder(folderId);
+};
+
 export const createFolderPath = async (
   folderPath: string,
   pathToIdMap: FolderPathMap,

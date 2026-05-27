@@ -81,7 +81,15 @@ const parseBulkOrganizeResponse = (
       };
     });
 
-    return { folderPlan, assignments };
+    const folderOperations = Array.isArray(parsed.folderOperations)
+      ? parsed.folderOperations.map((op: Record<string, unknown>) => ({
+          folderPath: String(op.folderPath ?? ''),
+          operation: String(op.operation ?? '') as 'delete' | 'unpack',
+          description: String(op.description ?? ''),
+        }))
+      : undefined;
+
+    return { folderPlan, assignments, folderOperations };
   } catch (error) {
     console.error('Failed to parse bulk organize response:', error, '\nResponse:', responseText);
     throw new Error('Failed to parse AI response');
