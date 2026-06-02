@@ -3,7 +3,7 @@ import { type OrganizeSession } from './types/organize';
 import { organizeBookmarks } from './services/ai/bulkOrganize';
 import { saveOrganizeSession, loadOrganizeSession, getInitialSession } from './services/organizeSession';
 import { type ActionPreviewData, type ChatResponsePayload, type ApplyChatActionPayload } from './types/chat';
-import { moveBookmark, createFolderPath, getFullBookmarkLibrary, deleteFolder, unpacking, getBookmarkById } from './services/bookmarks';
+import { moveBookmark, createFolderPath, getFullBookmarkLibrary, deleteFolder, unpacking, getBookmarkById, createBookmark } from './services/bookmarks';
 import { buildFullIdToPathMapFromTree, findFolderIdByAIPath } from './utils/folders';
 import { type BulkOrganizeResult } from './types/organize';
 
@@ -104,10 +104,10 @@ const handleChatRequest = async (payload: ChatRequestPayload): Promise<void> => 
     // Get ALL bookmarks in the library
     const allBookmarks = await getFullBookmarkLibrary();
 
-    // Also get open tabs for context
-    const tabs = await chrome.tabs.query({ currentWindow: true });
+    // Also get open tabs for context - query ALL windows, not just current
+    const tabs = await chrome.tabs.query({});
     const openTabBookmarks = tabs
-      .filter(t => t.url && !t.url.startsWith('chrome://'))
+      .filter(t => t.url && !t.url.startsWith('chrome://') && !t.url.startsWith('edge://') && !t.url.startsWith('about:'))
       .map(t => ({
         id: `tab-${t.id}`,
         title: t.title || 'Untitled Tab',
@@ -168,8 +168,38 @@ const handleChatRequest = async (payload: ChatRequestPayload): Promise<void> => 
 
     notifyPopup('CHAT_RESPONSE', response);
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Failed to process your request.';
-    throw new Error(errorMessage);
+    let errorMessage = 'Failed to process your request.';
+
+    if (error instanceof Error) {
+      const errMsg = error.message.toLowerCase();
+
+      // Handle rate limit errors
+      if (errMsg.includes('503') || errMsg.includes('unavailable') || errMsg.includes('high demand')) {
+        errorMessage = '⏳ API Overload: The AI service is experiencing high demand. Please try again in a moment.';
+      }
+      // Handle quota exceeded
+      else if (errMsg.includes('429') || errMsg.includes('quota') || errMsg.includes('rate limit')) {
+        errorMessage = '⛔ Rate Limited: Too many requests. Please wait a few moments before trying again.';
+      }
+      // Handle authentication errors
+      else if (errMsg.includes('401') || errMsg.includes('unauthorized') || errMsg.includes('invalid api key')) {
+        errorMessage = '🔑 Authentication Error: Your API key is invalid or expired. Check your settings.';
+      }
+      // Handle invalid request
+      else if (errMsg.includes('400') || errMsg.includes('bad request')) {
+        errorMessage = '❌ Invalid Request: The request was malformed. Please try rephrasing your command.';
+      }
+      // Generic API errors
+      else if (errMsg.includes('api') || errMsg.includes('error')) {
+        errorMessage = `⚠️ API Error: ${error.message}`;
+      }
+      // Use original message if it's helpful
+      else if (error.message.length < 200) {
+        errorMessage = error.message;
+      }
+    }
+
+    notifyPopup('CHAT_ACTION_ERROR', { errorMessage });
   }
 };
 
@@ -282,9 +312,41 @@ const handleApplyChatAction = async (payload: ApplyChatActionPayload): Promise<v
 
     for (const bookmark of affectedBookmarks) {
       try {
-        // Skip tabs as they're handled separately
+        // Handle tabs differently - bookmark them instead of moving
         if (bookmark.id.startsWith('tab-')) {
-          console.log(`[ApplyAction] Skipping tab: ${bookmark.id}`);
+          console.log(`[ApplyAction] Bookmarking tab: "${bookmark.title}" to "${bookmark.suggestedPath}"`);
+
+          // Extract tab ID from 'tab-{id}' format
+          const tabId = parseInt(bookmark.id.replace('tab-', ''), 10);
+
+          // Resolve the target folder ID
+          let targetFolderId = findFolderIdByAIPath(bookmark.suggestedPath, updatedPathToIdMap);
+
+          if (!targetFolderId) {
+            console.log(`[ApplyAction] Path not found in map, attempting to create: ${bookmark.suggestedPath}`);
+            targetFolderId = await createFolderPath(
+              bookmark.suggestedPath,
+              updatedPathToIdMap,
+              undefined
+            );
+            console.log(`[ApplyAction] Created and got folder ID: ${targetFolderId}`);
+          }
+
+          if (!targetFolderId) {
+            throw new Error(`Could not resolve folder ID for path: ${bookmark.suggestedPath}`);
+          }
+
+          // Get tab details
+          const tab = await chrome.tabs.get(tabId).catch(() => null);
+          if (tab && tab.url) {
+            // Create bookmark from tab
+            await createBookmark(targetFolderId, bookmark.title, tab.url);
+            console.log(`[ApplyAction] ✓ Successfully bookmarked tab: ${bookmark.title}`);
+            appliedCount++;
+          } else {
+            console.warn(`[ApplyAction] Tab ${tabId} not found or has no URL`);
+            skippedCount++;
+          }
           continue;
         }
 
@@ -316,7 +378,7 @@ const handleApplyChatAction = async (payload: ApplyChatActionPayload): Promise<v
         console.log(`[ApplyAction] ✓ Successfully moved: ${bookmark.title}`);
         appliedCount++;
       } catch (error) {
-        console.error(`[ApplyAction] ✗ Failed to move bookmark "${bookmark.title}":`, error);
+        console.error(`[ApplyAction] ✗ Failed to process "${bookmark.title}":`, error);
         skippedCount++;
       }
     }
@@ -328,7 +390,21 @@ const handleApplyChatAction = async (payload: ApplyChatActionPayload): Promise<v
     notifyPopup('CHAT_ACTION_COMPLETE', { appliedCount, skippedCount });
   } catch (error) {
     console.error('[ApplyAction] Critical error:', error);
-    throw error;
+
+    let errorMessage = 'Failed to apply changes.';
+    if (error instanceof Error) {
+      const errMsg = error.message.toLowerCase();
+
+      if (errMsg.includes('permission') || errMsg.includes('denied')) {
+        errorMessage = '🔒 Permission Denied: The extension lacks permission to modify bookmarks. Please check permissions.';
+      } else if (errMsg.includes('quota')) {
+        errorMessage = '📊 Chrome Storage Quota Exceeded: Too many bookmarks. Try organizing into fewer folders.';
+      } else if (error.message.length < 200) {
+        errorMessage = error.message;
+      }
+    }
+
+    notifyPopup('CHAT_ACTION_ERROR', { errorMessage });
   }
 };
 

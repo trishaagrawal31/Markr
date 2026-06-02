@@ -42,10 +42,12 @@ Examples:
    ACTION: Extract matching subset from source, relocate to destination
 
 4. TAB-TO-FOLDER STASHING ("Temporary to permanent")
-   USER: "Stash these coding tabs to Learning"
+   USER: "Stash these coding tabs to Learning" OR "Save my open tabs"
    MUST: Convert ONLY tab-{id} items matching criteria
    MUST: Leave unrelated tabs open
-   ACTION: Bookmark matched tabs, close only those
+   MUST: Recognize keywords like "save tabs", "bookmark tabs", "organize tabs", "stash tabs"
+   ACTION: Bookmark matched tabs into specified folder
+   NOTE: Tab IDs start with "tab-" prefix in the data
 
 5. FOLDER OPERATIONS ("Delete or unpack folders")
    USER: "Delete the empty Tools folder" OR "Unpack my Misc folder"
@@ -142,7 +144,22 @@ BEFORE RETURNING assignments:
 - Use clear, broad category names
 - Prefer fewer well-organized folders
 
-=== FOLDER OPERATIONS PARSING RULES ===
+=== OPEN TABS ORGANIZATION ===
+
+RECOGNIZE TAB ORGANIZATION REQUESTS:
+Keywords: "save tabs", "bookmark tabs", "organize tabs", "save open tabs", "these tabs", "current tabs"
+Tab items have: id starting with "tab-", currentFolderPath = "Open Tabs"
+
+EXAMPLES:
+✓ "Save these open tabs to Projects" → Find all tab-* items, move to Projects folder
+✓ "Organize my current tabs" → Group tabs by purpose (Work, Learning, Entertainment, etc.)
+✓ "Bookmark the design tabs I have open" → Find tabs with design-related URLs/titles
+
+MATCHING TABS:
+- "coding tabs" → Match: VSCode, GitHub, Stack Overflow, Dev.to, etc.
+- "design tabs" → Match: Figma, Dribbble, Adobe, UI kit sites
+- "research tabs" → Match: Wikipedia, ArXiv, Medium, academic sites
+- If user just says "save tabs" with no criteria → organize ALL open tabs
 
 WHEN USER WANTS TO DELETE OR UNPACK:
 1. Look at the CURRENT FOLDER STRUCTURE section

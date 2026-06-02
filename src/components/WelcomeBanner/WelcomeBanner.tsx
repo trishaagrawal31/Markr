@@ -37,9 +37,9 @@ const WelcomeBanner = () => {
   return (
     <div className="welcome-banner">
       <div className="welcome-banner-content">
-        <p className="welcome-banner-title">Welcome to MarkMind!</p>
+        <p className="welcome-banner-title">Welcome to Markr!</p>
         <p className="welcome-banner-text">
-          Head over to <strong>Organize</strong> and let AI tidy up your bookmarks. You'll be surprised how fast it is.
+          Head over to <strong>Organize</strong> or <strong>Chat</strong> and let AI tidy up your bookmarks. You'll be surprised how fast it is.
         </p>
       </div>
       <Button

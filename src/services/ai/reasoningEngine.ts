@@ -61,7 +61,10 @@ export const detectIntentPattern = (userIntent: string): IntentContext => {
   }
 
   // Detect tab operations
-  if (lowerIntent.includes('stash') || (lowerIntent.includes('tab') && lowerIntent.includes('folder'))) {
+  if (lowerIntent.includes('stash') ||
+      (lowerIntent.includes('tab') && (lowerIntent.includes('save') || lowerIntent.includes('bookmark') || lowerIntent.includes('organize'))) ||
+      (lowerIntent.includes('save') && lowerIntent.includes('tab')) ||
+      (lowerIntent.includes('open') && (lowerIntent.includes('save') || lowerIntent.includes('bookmark')))) {
     return { pattern: 'tab-to-folder' };
   }
 

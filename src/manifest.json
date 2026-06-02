@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Markr",
   "description": "Markr — Your AI Bookmark Manager",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "icons": {
     "16": "assets/icons/icon16.png",
     "48": "assets/icons/icon48.png",
@@ -25,7 +25,7 @@
     "activeTab",
     "storage",
     "scripting",
-    "alarms"
+    "alarms","tabs"
   ],
   "host_permissions": [
     "https://generativelanguage.googleapis.com/*",
