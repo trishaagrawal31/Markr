@@ -59,7 +59,7 @@ export const isHeadingSimilarToTitle = (title: string, heading: string): boolean
 export const extractApiErrorMessage = (responseBody: string): string | null => {
   try {
     const parsed = JSON.parse(responseBody);
-    return parsed?.error?.message || null;
+    return parsed?.error?.message || parsed?.message || parsed?.error || null;
   } catch {
     return null;
   }
@@ -76,7 +76,11 @@ export const humanizeApiError = (rawMessage: string, statusCode: number): string
   const lower = rawMessage.toLowerCase();
 
   if (statusCode === 429 || lower.includes('quota') || lower.includes('rate limit')) {
-    return 'Rate limit reached. Wait a moment or try a different model.';
+    return 'Rate limit reached. Please wait a moment and try again.';
+  }
+
+  if (statusCode === 503 || statusCode === 502 || lower.includes('overload') || lower.includes('high demand') || lower.includes('busy')) {
+    return 'The AI service is experiencing high demand. Please wait a moment and try again.';
   }
 
   if (statusCode === 401 || lower.includes('unauthorized') || lower.includes('invalid api key') || lower.includes('incorrect api key')) {

@@ -6,6 +6,7 @@ import { type ActionPreviewData, type ChatResponsePayload, type ApplyChatActionP
 import { moveBookmark, createFolderPath, getFullBookmarkLibrary, deleteFolder, unpacking, getBookmarkById, createBookmark } from './services/bookmarks';
 import { buildFullIdToPathMapFromTree, findFolderIdByAIPath } from './utils/folders';
 import { type BulkOrganizeResult } from './types/organize';
+import { queryAI } from './services/ai';
 
 const KEEPALIVE_ALARM_NAME = 'organize-keepalive';
 const KEEPALIVE_INTERVAL_MINUTES = 0.4;
@@ -96,8 +97,50 @@ const handleStartOrganize = async (payload: StartOrganizePayload): Promise<void>
   notifyPopup('ORGANIZE_COMPLETE', { result });
 };
 
+const isOrganizationRequest = (message: string): boolean => {
+  const lowerMsg = message.toLowerCase();
+  const organizationKeywords = [
+    'organize', 'move', 'sort', 'arrange', 'rearrange', 'reorganize',
+    'clean', 'group', 'categorize', 'folder', 'bookmark',
+    'save tab', 'bookmark tab', 'tab', 'save these',
+    'structure', 'order', 'sort out'
+  ];
+
+  const chatKeywords = ['what', 'how', 'why', 'help', 'can you', 'could you', 'tell me', 'explain', 'hello', 'hi', 'hey', 'good'];
+
+  // If message contains clear chat keywords and no organization keywords, it's a chat question
+  const hasChat = chatKeywords.some(kw => lowerMsg.includes(kw));
+  const hasOrganize = organizationKeywords.some(kw => lowerMsg.includes(kw));
+
+  // Only treat as organization request if it explicitly has organization keywords
+  // Otherwise, default to chat response for unknown messages
+  return hasOrganize && !hasChat;
+};
+
 const handleChatRequest = async (payload: ChatRequestPayload): Promise<void> => {
   try {
+    // Check if this is a chat question or an organization request
+    if (!isOrganizationRequest(payload.message)) {
+      // This is a general chat question - get dynamic AI response
+      const aiResponse = await queryAI(
+        payload.serviceId,
+        payload.modelId,
+        payload.message,
+        payload.maxOutputTokens
+      );
+
+      const response: ChatResponsePayload = {
+        message: aiResponse,
+        modelUsed: {
+          provider: 'AI Service',
+          model: payload.modelId,
+        },
+      };
+
+      notifyPopup('CHAT_RESPONSE', response);
+      return;
+    }
+
     // Get comprehensive bookmark context (not just open tabs)
     const tree = await chrome.bookmarks.getTree();
 

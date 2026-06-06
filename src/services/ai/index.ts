@@ -43,3 +43,14 @@ export const organizeBookmark = async (
 
   return parseOrganizeResponse(responseText);
 };
+
+export const queryAI = async (
+  serviceId: string,
+  model: string,
+  message: string,
+  maxTokens?: number
+): Promise<string> => {
+  const apiKey = await getApiKey(serviceId);
+  const systemPrompt = 'You are a helpful assistant. Provide clear, concise answers to user questions.';
+  return callProvider(serviceId, apiKey, systemPrompt, message, model, maxTokens);
+};

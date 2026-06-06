@@ -43,7 +43,7 @@ const WelcomeBanner = () => {
         </p>
       </div>
       <Button
-        variant="icon"
+        variant="icon" 
         className="welcome-banner-dismiss"
         onClick={handleDismiss}
         title="Dismiss"
