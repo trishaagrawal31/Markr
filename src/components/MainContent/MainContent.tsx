@@ -27,13 +27,6 @@ const MainContent = ({
 
   return (
     <div className="container">
-      <TabNavigation
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        showOrganizeTooltip={showOnboardingTooltips && activeTab === 'organize'}
-        onDismissOrganizeTooltip={onTooltipsDismissed}
-      />
-      
       <main className="main-content">
         {activeTab === 'home' && (
   <HomeTab 
@@ -47,6 +40,13 @@ const MainContent = ({
         {activeTab === 'chat' && <ChatTab />}
 
       </main>
+
+      <TabNavigation
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        showOrganizeTooltip={showOnboardingTooltips && activeTab === 'organize'}
+        onDismissOrganizeTooltip={onTooltipsDismissed}
+      />
     </div>
   );
 };
