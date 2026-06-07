@@ -50,7 +50,7 @@ const TabNavigation = ({
               onClick={handleTabClick(tabConfig)}
               className="tab-navigation-button"
             >
-              <TabIcon width={12} height={12} />
+              <TabIcon width={18} height={18} />
               {tabConfig.label}
             </Button>
           );

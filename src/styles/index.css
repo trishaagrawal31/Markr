@@ -9,48 +9,48 @@
 /* ========================================
    Google Fonts Import
    ======================================== */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* ========================================
    CSS Variables (Design Tokens) - Dark First
    ======================================== */
 :root {
-  /* Colors - Warm Ember palette */
-  --color-primary: #f5a524;           /* amber accent */
-  --color-primary-hover: #ffbb47;     /* lighter amber */
-  --color-primary-glow: rgba(245, 165, 36, 0.16);
-  --color-background: #0e0d0b;        /* warm near-black */
-  --color-bg-primary: #0e0d0b;        /* alias used by some components */
-  --color-surface: #17150f;           /* panel background */
-  --color-surface-hover: #211e16;     /* elevated surface */
-  --color-surface-elevated: #2a261c;  /* modal/dropdown bg */
-  --color-text: #f6f1e7;              /* warm off-white */
-  --color-text-secondary: #ddd4c2;    /* warm light */
-  --color-text-muted: #a99e87;        /* warm muted */
-  --color-text-light: #76705f;        /* warm dim */
-  --color-border: rgba(246, 241, 231, 0.08);
-  --color-border-light: rgba(246, 241, 231, 0.16);
-  --color-border-subtle: rgba(246, 241, 231, 0.08); /* alias */
-  --color-white: #100f0c;             /* inverted for dark theme */
+  /* Colors - Teal + Purple dark palette */
+  --color-primary: #2dd4bf;           /* teal-400 - vibrant accent */
+  --color-primary-hover: #5eead4;     /* teal-300 */
+  --color-primary-glow: rgba(45, 212, 191, 0.15);
+  --color-background: #0b0f12;        /* deep cool dark */
+  --color-bg-primary: #0b0f12;        /* alias used by some components */
+  --color-surface: #11171c;           /* panel background */
+  --color-surface-hover: #18202733;   /* elevated surface */
+  --color-surface-elevated: #1d262e;  /* modal/dropdown bg */
+  --color-text: #ecfeff;              /* cyan-tinted off-white */
+  --color-text-secondary: #c7d3d6;    /* cool light */
+  --color-text-muted: #8b9aa0;        /* cool muted */
+  --color-text-light: #5e6b70;        /* cool dim */
+  --color-border: rgba(94, 234, 212, 0.1);
+  --color-border-light: rgba(167, 139, 250, 0.22);
+  --color-border-subtle: rgba(200, 220, 225, 0.08); /* alias */
+  --color-white: #0d1216;             /* inverted for dark theme */
 
   /* Accent Colors - Status */
-  --color-success-bg: rgba(74, 222, 128, 0.14);
-  --color-success: #4ade80;           /* green-400 */
+  --color-success-bg: rgba(45, 212, 191, 0.14);
+  --color-success: #2dd4bf;           /* teal-400 */
   --color-error-bg: rgba(248, 113, 113, 0.14);
   --color-error-bg-hover: rgba(248, 113, 113, 0.24);
   --color-error: #f87171;             /* red-400 */
   --color-error-dark: #fca5a5;        /* red-300 */
-  --color-warning-bg: rgba(245, 165, 36, 0.14);
-  --color-warning: #f5a524;           /* amber */
-  --color-link: #fbbf24;              /* amber-400 */
+  --color-warning-bg: rgba(167, 139, 250, 0.16);
+  --color-warning: #a78bfa;           /* violet-400 */
+  --color-link: #a78bfa;              /* violet-400 */
 
-  /* Accent Colors - Decorative (warm-leaning) */
-  --color-accent-purple-bg: rgba(248, 113, 113, 0.14);
-  --color-accent-purple: #fb7185;     /* rose-400 */
-  --color-accent-orange-bg: rgba(251, 146, 60, 0.14);
-  --color-accent-orange: #fb923c;     /* orange-400 */
-  --color-accent-cyan-bg: rgba(45, 212, 191, 0.14);
-  --color-accent-cyan: #2dd4bf;       /* teal-400 */
+  /* Accent Colors - Decorative (teal/purple-leaning) */
+  --color-accent-purple-bg: rgba(167, 139, 250, 0.15);
+  --color-accent-purple: #a78bfa;     /* violet-400 */
+  --color-accent-orange-bg: rgba(45, 212, 191, 0.14);
+  --color-accent-orange: #2dd4bf;     /* teal-400 */
+  --color-accent-cyan-bg: rgba(34, 211, 238, 0.15);
+  --color-accent-cyan: #22d3ee;       /* cyan-400 */
 
   /* Spacing Scale */
   --spacing-2xs: 2px;
@@ -64,7 +64,7 @@
   --spacing-4xl: 24px;
 
   /* Typography */
-  --font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-size-2xs: 9px;
   --font-size-xs: 10px;
@@ -92,17 +92,17 @@
   --letter-spacing-normal: 0;
   --letter-spacing-wide: 0.08em;
 
-  /* Border Radius - sharp, paneled geometry */
-  --radius-sm: 2px;
-  --radius-md: 4px;
-  --radius-lg: 6px;
-  --radius-xl: 8px;
+  /* Border Radius - rounded, soft geometry */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
   --radius-full: 9999px;
 
-  /* Shadows - crisp, low-spread */
-  --shadow-sm: 0 1px 0 rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 0 1px var(--color-primary-glow);
+  /* Shadows - soft glow */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-glow: 0 0 20px var(--color-primary-glow);
 
   /* Transitions */
   --transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -140,46 +140,46 @@ svg, path {
    Light Mode (Optional Override)
    ======================================== */
 [data-theme="light"] {
-  --color-primary: #b45309;           /* amber-700 */
-  --color-primary-hover: #d97706;     /* amber-600 */
-  --color-primary-glow: rgba(180, 83, 9, 0.1);
-  --color-background: #faf7f0;        /* warm paper */
-  --color-bg-primary: #faf7f0;
+  --color-primary: #0d9488;           /* teal-600 */
+  --color-primary-hover: #14b8a6;     /* teal-500 */
+  --color-primary-glow: rgba(13, 148, 136, 0.1);
+  --color-background: #f4f7f8;        /* cool paper */
+  --color-bg-primary: #f4f7f8;
   --color-surface: #ffffff;
-  --color-surface-hover: #f3eee3;
+  --color-surface-hover: #eef3f4;
   --color-surface-elevated: #ffffff;
-  --color-text: #1c1810;              /* warm near-black */
-  --color-text-secondary: #443c2c;
-  --color-text-muted: #6e6552;
-  --color-text-light: #a39a86;
-  --color-border: rgba(28, 24, 16, 0.1);
-  --color-border-light: rgba(28, 24, 16, 0.16);
-  --color-border-subtle: rgba(28, 24, 16, 0.08);
+  --color-text: #0c1517;              /* cool near-black */
+  --color-text-secondary: #2f3e42;
+  --color-text-muted: #5e6b70;
+  --color-text-light: #97a4a8;
+  --color-border: rgba(13, 148, 136, 0.14);
+  --color-border-light: rgba(124, 58, 237, 0.22);
+  --color-border-subtle: rgba(12, 21, 23, 0.08);
   --color-white: #ffffff;
 
   /* Accent Colors - Status */
-  --color-success-bg: rgba(22, 163, 74, 0.1);
-  --color-success: #16a34a;
+  --color-success-bg: rgba(13, 148, 136, 0.1);
+  --color-success: #0d9488;
   --color-error-bg: rgba(220, 38, 38, 0.1);
   --color-error-bg-hover: rgba(220, 38, 38, 0.16);
   --color-error: #dc2626;
   --color-error-dark: #b91c1c;
-  --color-warning-bg: rgba(180, 83, 9, 0.1);
-  --color-warning: #b45309;
-  --color-link: #b45309;
+  --color-warning-bg: rgba(124, 58, 237, 0.1);
+  --color-warning: #7c3aed;
+  --color-link: #7c3aed;
 
   /* Accent Colors - Decorative */
-  --color-accent-purple-bg: rgba(225, 29, 72, 0.1);
-  --color-accent-purple: #e11d48;
-  --color-accent-orange-bg: rgba(234, 88, 12, 0.1);
-  --color-accent-orange: #ea580c;
-  --color-accent-cyan-bg: rgba(13, 148, 136, 0.1);
-  --color-accent-cyan: #0d9488;
+  --color-accent-purple-bg: rgba(124, 58, 237, 0.1);
+  --color-accent-purple: #7c3aed;
+  --color-accent-orange-bg: rgba(13, 148, 136, 0.1);
+  --color-accent-orange: #0d9488;
+  --color-accent-cyan-bg: rgba(6, 182, 212, 0.1);
+  --color-accent-cyan: #0891b2;
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.1);
-  --shadow-glow: 0 0 0 1px var(--color-primary-glow);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-glow: 0 0 20px var(--color-primary-glow);
 }
 
 /* ========================================
@@ -433,7 +433,7 @@ a:hover {
   height: var(--spacing-3xl);
   border-radius: var(--radius-sm);
   background-color: var(--color-primary);
-  color: #1c1306;
+  color: #04201d;
   font-size: var(--font-size-2xs);
   font-weight: var(--font-weight-bold);
   display: flex;
