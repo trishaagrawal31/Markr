@@ -1,52 +1,56 @@
 /**
- * Markr Design System - Modern Dark Theme
- * All colors, spacing, typography, and radii defined as CSS variables
- * NO hardcoded values allowed in component styles
+ * Markr Design System - "Ember" Warm Dark Theme
+ * Complete visual overhaul: warm charcoal surfaces, amber accent,
+ * geometric Space Grotesk type, sharp-edged paneled geometry.
+ * All colors, spacing, typography, and radii defined as CSS variables.
+ * NO hardcoded values allowed in component styles.
  */
 
 /* ========================================
    Google Fonts Import
    ======================================== */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* ========================================
    CSS Variables (Design Tokens) - Dark First
    ======================================== */
 :root {
-  /* Colors - Modern Dark Slate palette */
-  --color-primary: #6366f1;           /* indigo-500 - vibrant accent */
-  --color-primary-hover: #818cf8;     /* indigo-400 */
-  --color-primary-glow: rgba(99, 102, 241, 0.15);
-  --color-background: #0a0a0f;        /* deep dark */
-  --color-surface: #12121a;           /* card background */
-  --color-surface-hover: #1a1a24;     /* elevated surface */
-  --color-surface-elevated: #1e1e2a;  /* modal/dropdown bg */
-  --color-text: #f1f5f9;              /* slate-100 */
-  --color-text-secondary: #cbd5e1;    /* slate-300 */
-  --color-text-muted: #94a3b8;        /* slate-400 */
-  --color-text-light: #64748b;        /* slate-500 */
-  --color-border: rgba(148, 163, 184, 0.12);   /* subtle border */
-  --color-border-light: rgba(148, 163, 184, 0.2);
-  --color-white: #0f0f14;             /* inverted for dark theme */
+  /* Colors - Warm Ember palette */
+  --color-primary: #f5a524;           /* amber accent */
+  --color-primary-hover: #ffbb47;     /* lighter amber */
+  --color-primary-glow: rgba(245, 165, 36, 0.16);
+  --color-background: #0e0d0b;        /* warm near-black */
+  --color-bg-primary: #0e0d0b;        /* alias used by some components */
+  --color-surface: #17150f;           /* panel background */
+  --color-surface-hover: #211e16;     /* elevated surface */
+  --color-surface-elevated: #2a261c;  /* modal/dropdown bg */
+  --color-text: #f6f1e7;              /* warm off-white */
+  --color-text-secondary: #ddd4c2;    /* warm light */
+  --color-text-muted: #a99e87;        /* warm muted */
+  --color-text-light: #76705f;        /* warm dim */
+  --color-border: rgba(246, 241, 231, 0.08);
+  --color-border-light: rgba(246, 241, 231, 0.16);
+  --color-border-subtle: rgba(246, 241, 231, 0.08); /* alias */
+  --color-white: #100f0c;             /* inverted for dark theme */
 
   /* Accent Colors - Status */
-  --color-success-bg: rgba(16, 185, 129, 0.15);
-  --color-success: #10b981;           /* emerald-500 */
-  --color-error-bg: rgba(239, 68, 68, 0.15);
-  --color-error-bg-hover: rgba(239, 68, 68, 0.25);
-  --color-error: #ef4444;             /* red-500 */
-  --color-error-dark: #f87171;        /* red-400 */
-  --color-warning-bg: rgba(245, 158, 11, 0.15);
-  --color-warning: #f59e0b;           /* amber-500 */
-  --color-link: #38bdf8;              /* sky-400 */
+  --color-success-bg: rgba(74, 222, 128, 0.14);
+  --color-success: #4ade80;           /* green-400 */
+  --color-error-bg: rgba(248, 113, 113, 0.14);
+  --color-error-bg-hover: rgba(248, 113, 113, 0.24);
+  --color-error: #f87171;             /* red-400 */
+  --color-error-dark: #fca5a5;        /* red-300 */
+  --color-warning-bg: rgba(245, 165, 36, 0.14);
+  --color-warning: #f5a524;           /* amber */
+  --color-link: #fbbf24;              /* amber-400 */
 
-  /* Accent Colors - Decorative */
-  --color-accent-purple-bg: rgba(139, 92, 246, 0.15);
-  --color-accent-purple: #a78bfa;     /* violet-400 */
-  --color-accent-orange-bg: rgba(251, 146, 60, 0.15);
+  /* Accent Colors - Decorative (warm-leaning) */
+  --color-accent-purple-bg: rgba(248, 113, 113, 0.14);
+  --color-accent-purple: #fb7185;     /* rose-400 */
+  --color-accent-orange-bg: rgba(251, 146, 60, 0.14);
   --color-accent-orange: #fb923c;     /* orange-400 */
-  --color-accent-cyan-bg: rgba(34, 211, 238, 0.15);
-  --color-accent-cyan: #22d3ee;       /* cyan-400 */
+  --color-accent-cyan-bg: rgba(45, 212, 191, 0.14);
+  --color-accent-cyan: #2dd4bf;       /* teal-400 */
 
   /* Spacing Scale */
   --spacing-2xs: 2px;
@@ -60,7 +64,8 @@
   --spacing-4xl: 24px;
 
   /* Typography */
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-size-2xs: 9px;
   --font-size-xs: 10px;
   --font-size-sm: 11px;
@@ -78,30 +83,31 @@
   --font-weight-bold: 700;
 
   /* Line Heights */
-  --line-height-tight: 1.25;
+  --line-height-tight: 1.2;
   --line-height-normal: 1.5;
-  --line-height-relaxed: 1.625;
+  --line-height-relaxed: 1.6;
 
   /* Letter Spacing */
-  --letter-spacing-tight: -0.025em;
+  --letter-spacing-tight: -0.01em;
   --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.08em;
 
-  /* Border Radius */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 18px;
+  /* Border Radius - sharp, paneled geometry */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
   --radius-full: 9999px;
 
-  /* Shadows - Modern glassmorphism style */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
-  --shadow-glow: 0 0 20px var(--color-primary-glow);
+  /* Shadows - crisp, low-spread */
+  --shadow-sm: 0 1px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 0 1px var(--color-primary-glow);
 
   /* Transitions */
-  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 180ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 260ms cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Layout */
   --popup-width: 400px;
@@ -134,44 +140,46 @@ svg, path {
    Light Mode (Optional Override)
    ======================================== */
 [data-theme="light"] {
-  --color-primary: #4f46e5;           /* indigo-600 */
-  --color-primary-hover: #6366f1;     /* indigo-500 */
-  --color-primary-glow: rgba(79, 70, 229, 0.1);
-  --color-background: #f8fafc;        /* slate-50 */
+  --color-primary: #b45309;           /* amber-700 */
+  --color-primary-hover: #d97706;     /* amber-600 */
+  --color-primary-glow: rgba(180, 83, 9, 0.1);
+  --color-background: #faf7f0;        /* warm paper */
+  --color-bg-primary: #faf7f0;
   --color-surface: #ffffff;
-  --color-surface-hover: #f1f5f9;     /* slate-100 */
+  --color-surface-hover: #f3eee3;
   --color-surface-elevated: #ffffff;
-  --color-text: #0f172a;              /* slate-900 */
-  --color-text-secondary: #334155;    /* slate-700 */
-  --color-text-muted: #64748b;        /* slate-500 */
-  --color-text-light: #94a3b8;        /* slate-400 */
-  --color-border: rgba(15, 23, 42, 0.08);
-  --color-border-light: rgba(15, 23, 42, 0.12);
+  --color-text: #1c1810;              /* warm near-black */
+  --color-text-secondary: #443c2c;
+  --color-text-muted: #6e6552;
+  --color-text-light: #a39a86;
+  --color-border: rgba(28, 24, 16, 0.1);
+  --color-border-light: rgba(28, 24, 16, 0.16);
+  --color-border-subtle: rgba(28, 24, 16, 0.08);
   --color-white: #ffffff;
 
   /* Accent Colors - Status */
-  --color-success-bg: rgba(16, 185, 129, 0.1);
-  --color-success: #059669;
-  --color-error-bg: rgba(239, 68, 68, 0.1);
-  --color-error-bg-hover: rgba(239, 68, 68, 0.15);
+  --color-success-bg: rgba(22, 163, 74, 0.1);
+  --color-success: #16a34a;
+  --color-error-bg: rgba(220, 38, 38, 0.1);
+  --color-error-bg-hover: rgba(220, 38, 38, 0.16);
   --color-error: #dc2626;
   --color-error-dark: #b91c1c;
-  --color-warning-bg: rgba(245, 158, 11, 0.1);
-  --color-warning: #d97706;
-  --color-link: #0284c7;
+  --color-warning-bg: rgba(180, 83, 9, 0.1);
+  --color-warning: #b45309;
+  --color-link: #b45309;
 
   /* Accent Colors - Decorative */
-  --color-accent-purple-bg: rgba(139, 92, 246, 0.1);
-  --color-accent-purple: #7c3aed;
-  --color-accent-orange-bg: rgba(251, 146, 60, 0.1);
+  --color-accent-purple-bg: rgba(225, 29, 72, 0.1);
+  --color-accent-purple: #e11d48;
+  --color-accent-orange-bg: rgba(234, 88, 12, 0.1);
   --color-accent-orange: #ea580c;
-  --color-accent-cyan-bg: rgba(6, 182, 212, 0.1);
-  --color-accent-cyan: #0891b2;
+  --color-accent-cyan-bg: rgba(13, 148, 136, 0.1);
+  --color-accent-cyan: #0d9488;
 
   /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
-  --shadow-glow: 0 0 20px var(--color-primary-glow);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.1);
+  --shadow-glow: 0 0 0 1px var(--color-primary-glow);
 }
 
 /* ========================================
@@ -264,7 +272,7 @@ input[type="email"] {
   font-family: var(--font-family);
   font-size: var(--font-size-sm);
   color: var(--color-text);
-  background-color: var(--color-white);
+  background-color: var(--color-surface-hover);
   transition: all var(--transition-fast);
 }
 
@@ -272,8 +280,8 @@ input[type="text"]:focus,
 input[type="password"]:focus,
 input[type="email"]:focus {
   outline: none;
-  border-color: transparent;
-  box-shadow: 0 0 0 2px var(--color-primary);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
 }
 
 input::placeholder {
@@ -284,7 +292,7 @@ input::placeholder {
    Card Component
    ======================================== */
 .card {
-  background-color: var(--color-white);
+  background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   padding: var(--spacing-xl);
@@ -349,7 +357,6 @@ a:hover {
   padding: var(--spacing-xl) var(--spacing-2xl);
   border-bottom: 1px solid var(--color-border);
   background-color: var(--color-surface);
-  backdrop-filter: blur(12px);
 }
 
 .main-header-left {
@@ -359,8 +366,8 @@ a:hover {
 }
 
 .main-header-logo {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: var(--radius-md);
 }
 
@@ -424,16 +431,15 @@ a:hover {
 .step-list-number {
   width: var(--spacing-3xl);
   height: var(--spacing-3xl);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-sm);
   background-color: var(--color-primary);
-  color: #ffffff;
+  color: #1c1306;
   font-size: var(--font-size-2xs);
   font-weight: var(--font-weight-bold);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: var(--shadow-glow);
 }
 
 .step-list-text {

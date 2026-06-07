@@ -4,29 +4,52 @@
 
 .tab-navigation {
   display: flex;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md) var(--spacing-2xl);
-  border-bottom: 1px solid var(--color-border);
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
   background-color: var(--color-surface);
 }
 
-.tab-navigation-button {
+/* Override Button's ghost base for a bottom-bar item:
+   stacked icon + label, no border, top accent indicator. */
+.tab-navigation-button.btn-ghost {
   flex: 1;
-  justify-content: center;
-  padding: var(--spacing-lg) var(--spacing-md);
-  font-size: var(--font-size-xs);
-  gap: var(--spacing-sm);
-  border-radius: var(--radius-lg);
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-md) var(--spacing-xs) var(--spacing-sm);
+  border: none;
+  border-top: 2px solid transparent;
+  border-radius: 0;
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-light);
+  background: transparent;
 }
 
-.tab-navigation-button.active {
-  background: linear-gradient(135deg, var(--color-primary-glow), transparent);
+.tab-navigation-button.btn-ghost:hover {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border-top-color: transparent;
+  box-shadow: none;
+}
+
+.tab-navigation-button.btn-ghost.active {
+  background-color: var(--color-primary-glow);
+  border-top: 2px solid var(--color-primary);
+  color: var(--color-primary);
+  box-shadow: none;
+}
+
+.tab-navigation-button.btn-ghost svg {
+  width: 16px;
+  height: 16px;
 }
 
 .tab-navigation-tooltip {
   position: absolute;
-  top: 100%;
+  bottom: 100%;
   left: 25%;
-  padding-top: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
   z-index: 50;
 }
