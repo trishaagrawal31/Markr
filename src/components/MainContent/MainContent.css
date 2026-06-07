@@ -1,14 +1,14 @@
 .container {
   display: flex;
-  flex-direction: column;
-  height: 100%; /* Ensure the container takes full height of the popup */
+  flex-direction: row; /* icon rail on the left, content on the right */
+  height: 100%;
   width: 100%;
   background-color: var(--color-bg-primary);
 }
 
 .tab-navigation-wrapper {
-  flex-shrink: 0; /* Prevent navigation from shrinking */
-  border-top: 1px solid var(--color-border-subtle);
+  flex-shrink: 0; /* Prevent the rail from shrinking */
+  border-right: 1px solid var(--color-border-subtle);
 }
 
 .main-content {
