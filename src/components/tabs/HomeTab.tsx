@@ -11,8 +11,7 @@ interface HomeTabProps {
 }
 
 const HomeTab = ({
-  _onTabChange,
-  _onOpenSettings,
+
   showCardTooltip = false,
   onDismissCardTooltip,
 }: HomeTabProps) => {
