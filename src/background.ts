@@ -171,27 +171,30 @@ const isOrganizationRequest = (message: string): boolean => {
     'structure', 'order', 'sort out'
   ];
 
-  const chatKeywords = ['what', 'how', 'why', 'help', 'can you', 'could you', 'tell me', 'explain', 'hello', 'hi', 'hey', 'good'];
-
-  // If message contains clear chat keywords and no organization keywords, it's a chat question
-  const hasChat = chatKeywords.some(kw => lowerMsg.includes(kw));
   const hasOrganize = organizationKeywords.some(kw => lowerMsg.includes(kw));
 
-  // Only treat as organization request if it explicitly has organization keywords
-  // Otherwise, default to chat response for unknown messages
-  return hasOrganize && !hasChat;
+  // If message contains organization keywords, treat as organization request
+  // regardless of chat keywords. For example: "how do I organize X?" should be treated as organization
+  return hasOrganize;
 };
 
 const handleChatRequest = async (payload: ChatRequestPayload): Promise<void> => {
   try {
     // Check if this is a chat question or an organization request
     if (!isOrganizationRequest(payload.message)) {
-      // This is a general chat question - get dynamic AI response
+      // This is a general chat question - get dynamic AI response with bookmark context
+      let contextMessage = payload.message;
+
+      // Add bookmark context from the payload if available
+      if (payload.folderTree || Object.keys(payload.pathToIdMap).length > 0) {
+        contextMessage = `User's bookmark library context:\n\nFolders: ${Object.keys(payload.pathToIdMap).join(', ') || 'No folders'}\n\nUser question: ${payload.message}`;
+      }
+
       const aiResponse = await retryWithBackoff(() =>
         queryAI(
           payload.serviceId,
           payload.modelId,
-          payload.message,
+          contextMessage,
           payload.maxOutputTokens
         )
       );
@@ -236,7 +239,7 @@ const handleChatRequest = async (payload: ChatRequestPayload): Promise<void> => 
     let folderTree = '';
     try {
       folderTree = JSON.stringify(tree, null, 2);
-    } catch (e) {
+    } catch {
       // Ignore tree serialization errors
     }
 

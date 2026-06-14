@@ -16,8 +16,8 @@ interface MainContentProps {
 
 const MainContent = ({
   onOpenSettings,
-  theme,
-  onToggleTheme,
+  _theme,
+  _onToggleTheme,
   showOnboardingTooltips,
   onTooltipsDismissed,
 }: MainContentProps) => {

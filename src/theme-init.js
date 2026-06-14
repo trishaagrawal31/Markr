@@ -1,3 +1,4 @@
+/* global localStorage, document */
 (function () {
   try {
     var saved = localStorage.getItem('themePreference');
@@ -7,5 +8,7 @@
       // Default to dark theme for modern UI
       document.documentElement.setAttribute('data-theme', 'dark');
     }
-  } catch (e) {}
+  } catch {
+    // Ignore errors
+  }
 })();

@@ -97,7 +97,7 @@ Just describe what you want, and I'll generate a precise preview for your approv
     return () => chrome.runtime.onMessage.removeListener(listener);
   }, [activeModel]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
@@ -111,16 +111,64 @@ Just describe what you want, and I'll generate a precise preview for your approv
     setInput('');
     setIsLoading(true);
 
-    const payload: ChatRequestPayload = {
-      message: userMsg.content,
-      serviceId: getSelectedServiceId(),
-      modelId: getSelectedModelId(),
-      maxOutputTokens: getSelectedMaxOutputTokens(),
-      folderTree: '',
-      pathToIdMap: {},
-    };
+    try {
+      // Fetch bookmark tree and build path mappings
+      const tree = await chrome.bookmarks.getTree();
+      let folderTree = '';
+      const pathToIdMap: Record<string, string> = {};
 
-    chrome.runtime.sendMessage({ type: 'CHAT_REQUEST', payload });
+      try {
+        folderTree = JSON.stringify(tree, null, 2);
+        // Build path map from tree structure
+        const buildPathMap = (nodes: chrome.bookmarks.BookmarkTreeNode[], path = '') => {
+          for (const node of nodes) {
+            const nodePath = path ? `${path}/${node.title}` : node.title;
+            if (!node.url) { // folder
+              pathToIdMap[nodePath] = node.id;
+            }
+            if (node.children) {
+              buildPathMap(node.children, nodePath);
+            }
+          }
+        };
+        buildPathMap(tree);
+      } catch {
+        // Ignore tree serialization errors
+      }
+
+      const payload: ChatRequestPayload = {
+        message: userMsg.content,
+        serviceId: getSelectedServiceId(),
+        modelId: getSelectedModelId(),
+        maxOutputTokens: getSelectedMaxOutputTokens(),
+        folderTree,
+        pathToIdMap,
+      };
+
+      chrome.runtime.sendMessage({ type: 'CHAT_REQUEST', payload }).catch((error) => {
+        console.error('[ChatTab] Failed to send message:', error);
+        setIsLoading(false);
+        const errorMsg: ChatMessage = {
+          role: 'assistant',
+          content: '❌ Error: Failed to send request to background worker.',
+          timestamp: Date.now(),
+          status: 'error',
+          modelIndicator: activeModel || undefined,
+        };
+        setMessages((prev) => [...prev, errorMsg]);
+      });
+    } catch (error) {
+      console.error('[ChatTab] Error preparing message:', error);
+      setIsLoading(false);
+      const errorMsg: ChatMessage = {
+        role: 'assistant',
+        content: '❌ Error: Failed to prepare message.',
+        timestamp: Date.now(),
+        status: 'error',
+        modelIndicator: activeModel || undefined,
+      };
+      setMessages((prev) => [...prev, errorMsg]);
+    }
   };
 
   const handleApproveAction = () => {
