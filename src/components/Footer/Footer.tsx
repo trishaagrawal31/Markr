@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { BugIcon, HeartIcon } from '../icons/Icons';
 import './Footer.css';
 
-const ISSUES_URL = 'https://github.com/migsilva89/MarkMind/issues';
+const ISSUES_URL = 'https://github.com/migsilva89/Markr/issues';
 
 const Footer = () => {
   const handleOpenLink = useCallback((url: string) => () => {

@@ -28,7 +28,7 @@ const QuickActions = ({ onTabChange, onOpenSettings }: QuickActionsProps) => {
         chrome.tabs.create({ url: action.externalUrl });
       } else if (action.targetTab === 'settings') {
         onOpenSettings();
-      } else {
+      } else if (action.targetTab) {
         onTabChange(action.targetTab);
       }
     },
@@ -40,7 +40,7 @@ const QuickActions = ({ onTabChange, onOpenSettings }: QuickActionsProps) => {
       <h2 className="quick-actions-title">Quick Actions</h2>
       <div className="quick-actions-grid">
         {QUICK_ACTIONS.map((action) => {
-          const ActionIcon = ACTION_ICONS[action.iconName];
+          const ActionIcon = action.iconName ? ACTION_ICONS[action.iconName] : undefined;
           return (
             <button
               key={action.id}

@@ -51,7 +51,7 @@ const OrganizeTab = () => {
           title={statusType === 'loading' && statusMessage
             ? statusMessage
             : 'Analyzing your bookmarks...'}
-          description="Feel free to close this popup — MarkMind keeps organizing in the background. Come back anytime to check progress."
+          description="Feel free to close this popup — Markr keeps organizing in the background. Come back anytime to check progress."
         >
           <Button onClick={handleCancelOrganizing} fullWidth>
             Cancel

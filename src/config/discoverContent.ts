@@ -131,7 +131,7 @@ export const PRO_TIPS_CARDS: DiscoverCard[] = [
     date: '',
     title: 'Bookmark now, organize later',
     description:
-      'Save anything interesting without worrying about the right folder. Let MarkMind sort it out when you are ready.',
+      'Save anything interesting without worrying about the right folder. Let Markr sort it out when you are ready.',
     iconName: 'sparkles',
   },
 ];

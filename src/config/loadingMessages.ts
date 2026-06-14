@@ -1,5 +1,5 @@
 export const LOADING_MESSAGES: string[] = [
-  'MarkMind is helping you...',
+  'Markr is helping you...',
   'Finding the perfect folder...',
   'Almost there!',
   "You're on the right path!",

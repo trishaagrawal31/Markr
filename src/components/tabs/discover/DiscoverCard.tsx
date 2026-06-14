@@ -19,7 +19,7 @@ interface DiscoverCardProps {
 }
 
 const DiscoverCard = ({ card }: DiscoverCardProps) => {
-  const CardIcon = CARD_ICONS[card.iconName];
+  const CardIcon = card.iconName ? CARD_ICONS[card.iconName] : undefined;
 
   return (
     <div className="discover-card">
