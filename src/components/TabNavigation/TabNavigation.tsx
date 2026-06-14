@@ -20,6 +20,7 @@ const TAB_CONFIG: TabConfig[] = [
 interface TabNavigationProps {
   activeTab: string;
   onTabChange: (tabId: string) => void;
+  onOpenSettings?: () => void;
   showOrganizeTooltip?: boolean;
   onDismissOrganizeTooltip?: () => void;
 }
@@ -27,14 +28,19 @@ interface TabNavigationProps {
 const TabNavigation = ({
   activeTab,
   onTabChange,
+  onOpenSettings,
   showOrganizeTooltip = false,
   onDismissOrganizeTooltip,
 }: TabNavigationProps) => {
   const handleTabClick = useCallback(
     (tabConfig: TabConfig) => () => {
-      onTabChange(tabConfig.id);
+      if (tabConfig.id === 'settings') {
+        onOpenSettings?.();
+      } else {
+        onTabChange(tabConfig.id);
+      }
     },
-    [onTabChange]
+    [onTabChange, onOpenSettings]
   );
 
   return (

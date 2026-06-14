@@ -16,6 +16,8 @@ interface MainContentProps {
 
 const MainContent = ({
   onOpenSettings,
+  theme,
+  onToggleTheme,
   showOnboardingTooltips,
   onTooltipsDismissed,
 }: MainContentProps) => {
@@ -30,6 +32,7 @@ const MainContent = ({
       <TabNavigation
         activeTab={activeTab}
         onTabChange={handleTabChange}
+        onOpenSettings={onOpenSettings}
         showOrganizeTooltip={showOnboardingTooltips && activeTab === 'organize'}
         onDismissOrganizeTooltip={onTooltipsDismissed}
       />

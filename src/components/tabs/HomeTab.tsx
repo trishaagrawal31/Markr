@@ -1,7 +1,6 @@
 import { useOrganizeBookmark } from '../../hooks/useOrganizeBookmark';
 import WelcomeBanner from '../WelcomeBanner/WelcomeBanner';
 import CurrentPageCard from '../CurrentPageCard/CurrentPageCard';
-import QuickActions from '../QuickActions/QuickActions';
 import OnboardingTooltip from '../OnboardingTooltip/OnboardingTooltip';
 
 interface HomeTabProps {
@@ -53,7 +52,6 @@ const HomeTab = ({
           onDismiss={onDismissCardTooltip}
         />
       )}
-      <QuickActions onTabChange={onTabChange} onOpenSettings={onOpenSettings} />
     </>
   );
 };

@@ -20,7 +20,11 @@ const OrganizeError = ({ errorMessage, onReset }: OrganizeErrorProps) => {
     <OrganizeStatusView
       icon={<WarningIcon width={20} height={20} />}
       title={isTransient ? 'Please try again' : 'Something went wrong'}
-      description={errorMessage || 'An unexpected error occurred'}
+      description={
+        isTransient
+          ? 'We tried 3 times but the service is still overloaded. Give it a moment and retry.'
+          : (errorMessage || 'An unexpected error occurred')
+      }
     >
       <Button onClick={onReset} fullWidth>
         <RefreshIcon />

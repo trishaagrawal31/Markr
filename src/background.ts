@@ -56,45 +56,110 @@ const buildActionPreviewFromResult = (
   };
 };
 
+const isTransientError = (error: unknown): boolean => {
+  if (!(error instanceof Error)) return false;
+  const msg = error.message.toLowerCase();
+  return msg.includes('503') || msg.includes('unavailable') || msg.includes('high demand') ||
+    msg.includes('429') || msg.includes('rate limit') || msg.includes('temporarily');
+};
+
+const retryWithBackoff = async <T,>(
+  fn: () => Promise<T>,
+  maxAttempts: number = 3,
+  initialDelayMs: number = 1000
+): Promise<T> => {
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (!(error instanceof Error)) throw error;
+      lastError = error;
+
+      // Only retry on transient errors
+      if (!isTransientError(error) || attempt === maxAttempts) {
+        throw error;
+      }
+
+      // Exponential backoff: 1s, 2s, 4s
+      const delayMs = initialDelayMs * Math.pow(2, attempt - 1);
+      console.log(`[Organize] Transient error, retrying in ${delayMs}ms (attempt ${attempt}/${maxAttempts})`, error.message);
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+    }
+  }
+
+  throw lastError || new Error('Unknown error');
+};
+
 const handleStartOrganize = async (payload: StartOrganizePayload): Promise<void> => {
   chrome.alarms.create(KEEPALIVE_ALARM_NAME, {
     periodInMinutes: KEEPALIVE_INTERVAL_MINUTES,
   });
 
-  const result = await organizeBookmarks(
-    payload.serviceId,
-    payload.modelId,
-    payload.bookmarks,
-    payload.folderTree,
-    payload.pathToIdMap,
-    payload.maxOutputTokens,
-    payload.userInstructions
-  );
+  try {
+    const result = await retryWithBackoff(() =>
+      organizeBookmarks(
+        payload.serviceId,
+        payload.modelId,
+        payload.bookmarks,
+        payload.folderTree,
+        payload.pathToIdMap,
+        payload.maxOutputTokens,
+        payload.userInstructions
+      )
+    );
 
-  // Merge AI results into the existing session (or a fresh one if storage read fails)
-  const existingSession = await loadOrganizeSession() ?? getInitialSession();
+    // Merge AI results into the existing session (or a fresh one if storage read fails)
+    const existingSession = await loadOrganizeSession() ?? getInitialSession();
 
-  // User may have cancelled while the AI call was in flight — do not overwrite
-  if (existingSession.status !== 'organizing') {
+    // User may have cancelled while the AI call was in flight — do not overwrite
+    if (existingSession.status !== 'organizing') {
+      chrome.alarms.clear(KEEPALIVE_ALARM_NAME);
+      return;
+    }
+
+    const completedSession: OrganizeSession = {
+      ...existingSession,
+      status: 'reviewing_assignments',
+      folderPlan: result.folderPlan,
+      assignments: result.assignments,
+      serviceId: payload.serviceId,
+      folderTree: payload.folderTree,
+      pathToIdMap: payload.pathToIdMap,
+      defaultParentId: payload.defaultParentId,
+    };
+
+    await saveOrganizeSession(completedSession);
     chrome.alarms.clear(KEEPALIVE_ALARM_NAME);
-    return;
+
+    notifyPopup('ORGANIZE_COMPLETE', { result });
+  } catch (error) {
+    chrome.alarms.clear(KEEPALIVE_ALARM_NAME);
+
+    let errorMessage = 'Failed to organize bookmarks.';
+    if (error instanceof Error) {
+      const errMsg = error.message.toLowerCase();
+
+      if (errMsg.includes('503') || errMsg.includes('unavailable') || errMsg.includes('high demand')) {
+        errorMessage = '⏳ API Overload: The AI service is experiencing high demand. Please wait a moment and try again.';
+      } else if (errMsg.includes('429') || errMsg.includes('quota') || errMsg.includes('rate limit')) {
+        errorMessage = '⛔ Rate Limited: Too many requests. Please wait a few moments before trying again.';
+      } else if (errMsg.includes('401') || errMsg.includes('unauthorized') || errMsg.includes('invalid api key')) {
+        errorMessage = '🔑 Authentication Error: Your API key is invalid or expired. Check your settings.';
+      } else if (errMsg.includes('timed out')) {
+        errorMessage = '⏱️ Request Timeout: The request took too long. Please try again with fewer bookmarks.';
+      } else if (errMsg.includes('network') || errMsg.includes('failed to fetch')) {
+        errorMessage = '🌐 Network Error: Unable to connect to the AI service. Check your internet connection.';
+      } else if (error.message.length < 200) {
+        errorMessage = error.message;
+      }
+    }
+
+    await persistError(errorMessage);
+    notifyPopup('ORGANIZE_ERROR', { errorMessage });
+    throw error;
   }
-
-  const completedSession: OrganizeSession = {
-    ...existingSession,
-    status: 'reviewing_assignments',
-    folderPlan: result.folderPlan,
-    assignments: result.assignments,
-    serviceId: payload.serviceId,
-    folderTree: payload.folderTree,
-    pathToIdMap: payload.pathToIdMap,
-    defaultParentId: payload.defaultParentId,
-  };
-
-  await saveOrganizeSession(completedSession);
-  chrome.alarms.clear(KEEPALIVE_ALARM_NAME);
-
-  notifyPopup('ORGANIZE_COMPLETE', { result });
 };
 
 const isOrganizationRequest = (message: string): boolean => {
@@ -122,11 +187,13 @@ const handleChatRequest = async (payload: ChatRequestPayload): Promise<void> => 
     // Check if this is a chat question or an organization request
     if (!isOrganizationRequest(payload.message)) {
       // This is a general chat question - get dynamic AI response
-      const aiResponse = await queryAI(
-        payload.serviceId,
-        payload.modelId,
-        payload.message,
-        payload.maxOutputTokens
+      const aiResponse = await retryWithBackoff(() =>
+        queryAI(
+          payload.serviceId,
+          payload.modelId,
+          payload.message,
+          payload.maxOutputTokens
+        )
       );
 
       const response: ChatResponsePayload = {
@@ -181,15 +248,17 @@ const handleChatRequest = async (payload: ChatRequestPayload): Promise<void> => 
 
     const bookmarksToAnalyze = includeOpenTabsOnly ? openTabBookmarks : [...allBookmarks, ...openTabBookmarks];
 
-    // Call AI with the comprehensive context
-    const result = await organizeBookmarks(
-      payload.serviceId,
-      payload.modelId,
-      bookmarksToAnalyze,
-      folderTree,
-      pathToIdMap,
-      payload.maxOutputTokens,
-      payload.message
+    // Call AI with the comprehensive context and automatic retry on transient errors
+    const result = await retryWithBackoff(() =>
+      organizeBookmarks(
+        payload.serviceId,
+        payload.modelId,
+        bookmarksToAnalyze,
+        folderTree,
+        pathToIdMap,
+        payload.maxOutputTokens,
+        payload.message
+      )
     );
 
     // Store result for later application
@@ -468,7 +537,20 @@ chrome.runtime.onMessage.addListener(
           console.error('[Background] Error starting organize:', error);
           chrome.alarms.clear(KEEPALIVE_ALARM_NAME);
 
-          const errorMessage = error instanceof Error ? error.message : 'Failed to organize bookmarks.';
+          let errorMessage = 'Failed to organize bookmarks.';
+          if (error instanceof Error) {
+            const errMsg = error.message.toLowerCase();
+            if (errMsg.includes('503') || errMsg.includes('unavailable') || errMsg.includes('high demand')) {
+              errorMessage = '⏳ API Overload: The AI service is experiencing high demand. Please wait a moment and try again.';
+            } else if (errMsg.includes('429') || errMsg.includes('rate limit')) {
+              errorMessage = '⛔ Rate Limited: Too many requests. Please wait before trying again.';
+            } else if (errMsg.includes('401') || errMsg.includes('unauthorized')) {
+              errorMessage = '🔑 Authentication Error: Check your API key in settings.';
+            } else if (error.message.length < 200) {
+              errorMessage = error.message;
+            }
+          }
+
           await persistError(errorMessage);
           notifyPopup('ORGANIZE_ERROR', { errorMessage });
         });
@@ -487,7 +569,19 @@ chrome.runtime.onMessage.addListener(
       case 'CHAT_REQUEST':
         handleChatRequest(message.payload as ChatRequestPayload).catch(async error => {
           console.error('[Background] Chat Error:', error);
-          const errorMessage = error instanceof Error ? error.message : 'Failed to process your request.';
+          let errorMessage = 'Failed to process your request.';
+          if (error instanceof Error) {
+            const errMsg = error.message.toLowerCase();
+            if (errMsg.includes('503') || errMsg.includes('unavailable') || errMsg.includes('high demand')) {
+              errorMessage = '⏳ API Overload: The AI service is experiencing high demand. Please try again in a moment.';
+            } else if (errMsg.includes('429') || errMsg.includes('rate limit')) {
+              errorMessage = '⛔ Rate Limited: Too many requests. Please wait a few moments.';
+            } else if (errMsg.includes('401') || errMsg.includes('unauthorized')) {
+              errorMessage = '🔑 Authentication Error: Your API key is invalid or expired.';
+            } else if (error.message.length < 200) {
+              errorMessage = error.message;
+            }
+          }
           notifyPopup('CHAT_ACTION_ERROR', { errorMessage });
         });
         sendResponse({ success: true });

@@ -183,7 +183,9 @@ Just describe what you want, and I'll generate a precise preview for your approv
         {isLoading && (
           <div className="chat-bubble-wrapper assistant">
             <div className="chat-avatar">
-              <SparklesIcon width={12} height={12} className="animate-pulse" />
+              <div className="animate-pulse">
+                <SparklesIcon width={12} height={12} />
+              </div>
             </div>
             <div className="chat-bubble assistant typing">
               <span className="thinking-dots">Thinking</span>
@@ -207,7 +209,9 @@ Just describe what you want, and I'll generate a precise preview for your approv
 
       <form className="chat-input-wrapper" onSubmit={handleSubmit}>
         <div className="chat-input-container">
-          <MessageSquareIcon className="chat-input-icon" width={16} height={16} />
+          <div className="chat-input-icon">
+            <MessageSquareIcon width={16} height={16} />
+          </div>
           <input
             type="text"
             placeholder="Type a command (e.g., 'Organize open tabs')..."
