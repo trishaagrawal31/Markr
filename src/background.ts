@@ -162,6 +162,32 @@ const handleStartOrganize = async (payload: StartOrganizePayload): Promise<void>
   }
 };
 
+const getMarkrContextResponse = (message: string): string | null => {
+  const normalizedMessage = message.trim().toLowerCase();
+  const markrIdentityPatterns = [
+    /\bwho\s+(is|are)\s+(markr|you|it|this)\b/i,
+    /\bwhat\s+(is|does|can)\s+(markr|this|it|you)\b/i,
+    /\bwhat\s+does\s+(it|this)\s+do\b/i,
+    /\bwhat\s+does\s+markr\s+do\b/i,
+    /\bwhat\s+can\s+markr\s+do\b/i,
+    /\bwho\s+is\s+markr\b/i,
+    /\bwhat\s+is\s+this\s+(app|extension)\b/i,
+    /\bwhat\s+does\s+this\s+(app|extension)\s+do\b/i,
+  ];
+
+  const isMarkrQuestion = markrIdentityPatterns.some(pattern => pattern.test(message));
+
+  if (!isMarkrQuestion) {
+    return null;
+  }
+
+  return [
+    'Markr is an AI-powered bookmark manager for your browser.',
+    'It helps you save, organize, and find bookmarks by understanding your library and suggesting the right folders.',
+    'You can ask it to sort bookmarks, create or clean up folders, move items, handle folder operations, and even organize your open tabs.',
+  ].join(' ');
+};
+
 const isOrganizationRequest = (message: string): boolean => {
   const lowerMsg = message.toLowerCase();
   const organizationKeywords = [
@@ -180,6 +206,20 @@ const isOrganizationRequest = (message: string): boolean => {
 
 const handleChatRequest = async (payload: ChatRequestPayload): Promise<void> => {
   try {
+    const markrResponse = getMarkrContextResponse(payload.message);
+    if (markrResponse) {
+      const response: ChatResponsePayload = {
+        message: markrResponse,
+        modelUsed: {
+          provider: 'AI Service',
+          model: payload.modelId,
+        },
+      };
+
+      notifyPopup('CHAT_RESPONSE', response);
+      return;
+    }
+
     // Check if this is a chat question or an organization request
     if (!isOrganizationRequest(payload.message)) {
       // This is a general chat question - get dynamic AI response with bookmark context
