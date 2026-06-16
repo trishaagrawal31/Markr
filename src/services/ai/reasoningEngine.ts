@@ -15,18 +15,18 @@ const extractFolderName = (text: string): string | null => {
   // "unpack [my] FolderName [folder]"
 
   const deletePatterns = [
-    /delete\s+(?:the\s+)?(?:empty\s+)?(?:folder\s+)?([^.!?]+?)(?:\s+folder)?$/i,
-    /remove\s+(?:the\s+)?(?:folder\s+)?([^.!?]+?)(?:\s+folder)?$/i,
-    /trash\s+(?:the\s+)?(?:folder\s+)?([^.!?]+?)(?:\s+folder)?$/i,
-    /get\s+rid\s+of\s+(?:the\s+)?(?:folder\s+)?([^.!?]+?)(?:\s+folder)?$/i,
+    /delete\s+(?:the\s+)?(?:empty\s+)?(?:folder\s+)?([^.!?]+?)(?:\s+folder)?(?:[.!?]|\s|$)/i,
+    /remove\s+(?:the\s+)?(?:folder\s+)?([^.!?]+?)(?:\s+folder)?(?:[.!?]|\s|$)/i,
+    /trash\s+(?:the\s+)?(?:folder\s+)?([^.!?]+?)(?:\s+folder)?(?:[.!?]|\s|$)/i,
+    /get\s+rid\s+of\s+(?:the\s+)?(?:folder\s+)?([^.!?]+?)(?:\s+folder)?(?:[.!?]|\s|$)/i,
   ];
 
   const unpackPatterns = [
-    /unpack\s+(?:my\s+)?(?:the\s+)?(?:folder\s+)?([^.!?]+?)(?:\s+folder)?$/i,
-    /flatten\s+(?:my\s+)?(?:the\s+)?(?:folder\s+)?([^.!?]+?)(?:\s+folder)?$/i,
-    /merge\s+(?:my\s+)?(?:the\s+)?(?:folder\s+)?([^.!?]+?)(?:\s+folder)?$/i,
-    /collapse\s+(?:my\s+)?(?:the\s+)?(?:folder\s+)?([^.!?]+?)(?:\s+folder)?$/i,
-    /unwrap\s+(?:my\s+)?(?:the\s+)?(?:folder\s+)?([^.!?]+?)(?:\s+folder)?$/i,
+    /unpack\s+(?:my\s+)?(?:the\s+)?(?:folder\s+)?([^.!?]+?)(?:\s+folder)?(?:[.!?]|\s|$)/i,
+    /flatten\s+(?:my\s+)?(?:the\s+)?(?:folder\s+)?([^.!?]+?)(?:\s+folder)?(?:[.!?]|\s|$)/i,
+    /merge\s+(?:my\s+)?(?:the\s+)?(?:folder\s+)?([^.!?]+?)(?:\s+folder)?(?:[.!?]|\s|$)/i,
+    /collapse\s+(?:my\s+)?(?:the\s+)?(?:folder\s+)?([^.!?]+?)(?:\s+folder)?(?:[.!?]|\s|$)/i,
+    /unwrap\s+(?:my\s+)?(?:the\s+)?(?:folder\s+)?([^.!?]+?)(?:\s+folder)?(?:[.!?]|\s|$)/i,
   ];
 
   const allPatterns = [...deletePatterns, ...unpackPatterns];
@@ -36,6 +36,20 @@ const extractFolderName = (text: string): string | null => {
       return match[1].trim();
     }
   }
+
+  // Fallback: if the user mentions 'unpack' plus a folder name anywhere, capture the last segment
+  if (/\b(unpack|flatten|merge|collapse|unwrap)\b/i.test(text)) {
+    const words = text
+      .replace(/\b(unpack|flatten|merge|collapse|unwrap|folder|my|the|please|now)\b/gi, '')
+      .replace(/[?!.]/g, '')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+    if (words.length > 0) {
+      return words.join(' ').trim();
+    }
+  }
+
   return null;
 };
 
@@ -64,7 +78,10 @@ export const detectIntentPattern = (userIntent: string): IntentContext => {
   if (lowerIntent.includes('stash') ||
       (lowerIntent.includes('tab') && (lowerIntent.includes('save') || lowerIntent.includes('bookmark') || lowerIntent.includes('organize'))) ||
       (lowerIntent.includes('save') && lowerIntent.includes('tab')) ||
-      (lowerIntent.includes('open') && (lowerIntent.includes('save') || lowerIntent.includes('bookmark')))) {
+      (lowerIntent.includes('open') && (lowerIntent.includes('save') || lowerIntent.includes('bookmark'))) ||
+      (lowerIntent.includes('organize') && lowerIntent.includes('tabs')) ||
+      (lowerIntent.includes('save') && lowerIntent.includes('tabs')) ||
+      (lowerIntent.includes('bookmark') && lowerIntent.includes('tabs')) ) {
     return { pattern: 'tab-to-folder' };
   }
 
@@ -93,6 +110,11 @@ export const buildIntentGuidance = (context: IntentContext, _bookmarks: CompactB
       return `USER WANTS TO UNPACK: ${folder}\n\nIMPORTANT: Return ONLY folderOperations, leave assignments empty. Find ${folder} in the folder structure and return it in folderOperations with operation: "unpack"`;
     }
   }
+
+  if (context.pattern === 'tab-to-folder') {
+    return `USER WANTS TO ORGANIZE OPEN TABS. Use only tab-* items from the Open Tabs list, and move them into the target folder structure. Return assignments for each matched tab item with a suggestedPath, and do not return folderOperations unless the user explicitly asks to delete or unpack a folder.`;
+  }
+
   return '';
 };
 

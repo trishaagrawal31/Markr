@@ -163,7 +163,6 @@ const handleStartOrganize = async (payload: StartOrganizePayload): Promise<void>
 };
 
 const getMarkrContextResponse = (message: string): string | null => {
-  const normalizedMessage = message.trim().toLowerCase();
   const markrIdentityPatterns = [
     /\bwho\s+(is|are)\s+(markr|you|it|this)\b/i,
     /\bwhat\s+(is|does|can)\s+(markr|this|it|you)\b/i,
@@ -194,7 +193,9 @@ const isOrganizationRequest = (message: string): boolean => {
     'organize', 'move', 'sort', 'arrange', 'rearrange', 'reorganize',
     'clean', 'group', 'categorize', 'folder', 'bookmark',
     'save tab', 'bookmark tab', 'tab', 'save these',
-    'structure', 'order', 'sort out'
+    'structure', 'order', 'sort out',
+    'unpack', 'flatten', 'collapse', 'merge',
+    'delete', 'remove', 'trash'
   ];
 
   const hasOrganize = organizationKeywords.some(kw => lowerMsg.includes(kw));

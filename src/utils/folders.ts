@@ -120,11 +120,27 @@ export const findFolderPathById = (idToPathMap: Record<string, string>, folderId
 
 // AI returns unescaped paths (e.g. "DNS/DOMAIN") but pathToIdMap keys use escaped paths ("DNS\/DOMAIN")
 export const findFolderIdByAIPath = (aiPath: string, pathToIdMap: FolderPathMap): string | undefined => {
-  if (pathToIdMap[aiPath]) return pathToIdMap[aiPath];
+  const normalizedAiPath = aiPath.trim().replace(/\\/g, '/');
+
+  if (pathToIdMap[normalizedAiPath]) return pathToIdMap[normalizedAiPath];
 
   for (const [escapedPath, folderId] of Object.entries(pathToIdMap)) {
     const unescapedPath = splitFolderPath(escapedPath).join('/');
-    if (unescapedPath === aiPath) return folderId;
+    if (unescapedPath === normalizedAiPath) return folderId;
+  }
+
+  // If AI provided just a folder name or a partial path, try best-effort matching.
+  const lowerAiPath = normalizedAiPath.toLowerCase();
+  const candidates = Object.entries(pathToIdMap).filter(([escapedPath]) => {
+    const unescapedPath = splitFolderPath(escapedPath).join('/');
+    const lowerUnescaped = unescapedPath.toLowerCase();
+    const lastSegment = lowerUnescaped.split('/').pop() ?? '';
+
+    return lastSegment === lowerAiPath || lowerUnescaped.endsWith(`/${lowerAiPath}`);
+  });
+
+  if (candidates.length === 1) {
+    return candidates[0][1];
   }
 
   return undefined;

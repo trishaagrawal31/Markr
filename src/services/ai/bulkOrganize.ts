@@ -35,20 +35,22 @@ const parseBulkOrganizeResponse = (
   try {
     const parsed = JSON.parse(jsonText);
 
-    if (typeof parsed !== 'object' || parsed === null || !Array.isArray(parsed.folders)) {
-      throw new Error('Response missing "folders" array');
+    if (typeof parsed !== 'object' || parsed === null) {
+      throw new Error('Response did not parse to a JSON object');
     }
 
-    if (!Array.isArray(parsed.assignments)) {
-      throw new Error('Response missing "assignments" array');
+    if (!Array.isArray(parsed.folders) && !Array.isArray(parsed.assignments) && !Array.isArray(parsed.folderOperations)) {
+      throw new Error('Response missing output arrays');
     }
 
-    const folders = parsed.folders.map((folder: Record<string, unknown>) => ({
-      path: String(folder.path ?? ''),
-      description: String(folder.description ?? ''),
-      isNew: Boolean(folder.isNew),
-      isExcluded: false,
-    }));
+    const folders = Array.isArray(parsed.folders)
+      ? parsed.folders.map((folder: Record<string, unknown>) => ({
+          path: String(folder.path ?? ''),
+          description: String(folder.description ?? ''),
+          isNew: Boolean(folder.isNew),
+          isExcluded: false,
+        }))
+      : [];
 
     const folderPlan: FolderPlan = {
       folders,
@@ -60,26 +62,28 @@ const parseBulkOrganizeResponse = (
       folders.filter((folder: { isNew: boolean }) => folder.isNew).map((folder: { path: string }) => folder.path)
     );
 
-    const assignments: BookmarkAssignment[] = parsed.assignments.map((entry: Record<string, unknown>) => {
-      const bookmarkId = String(entry.bookmarkId ?? '');
-      const suggestedPath = String(entry.suggestedPath ?? '');
-      const bookmark = bookmarkMap.get(bookmarkId);
+    const assignments: BookmarkAssignment[] = Array.isArray(parsed.assignments)
+      ? parsed.assignments.map((entry: Record<string, unknown>) => {
+          const bookmarkId = String(entry.bookmarkId ?? '');
+          const suggestedPath = String(entry.suggestedPath ?? '');
+          const bookmark = bookmarkMap.get(bookmarkId);
 
-      if (!bookmark) {
-        console.error('[BulkOrganize] Unknown bookmarkId in assignment:', bookmarkId);
-      }
+          if (!bookmark) {
+            console.error('[BulkOrganize] Unknown bookmarkId in assignment:', bookmarkId);
+          }
 
-      return {
-        bookmarkId,
-        bookmarkTitle: bookmark?.title ?? '',
-        bookmarkUrl: bookmark?.url ?? '',
-        currentPath: bookmark?.currentFolderPath ?? '',
-        suggestedPath,
-        suggestedFolderId: findFolderIdByAIPath(suggestedPath, pathToIdMap) ?? null,
-        isNewFolder: newFolderPaths.has(suggestedPath),
-        isApproved: true,
-      };
-    });
+          return {
+            bookmarkId,
+            bookmarkTitle: bookmark?.title ?? '',
+            bookmarkUrl: bookmark?.url ?? '',
+            currentPath: bookmark?.currentFolderPath ?? '',
+            suggestedPath,
+            suggestedFolderId: findFolderIdByAIPath(suggestedPath, pathToIdMap) ?? null,
+            isNewFolder: newFolderPaths.has(suggestedPath),
+            isApproved: true,
+          };
+        })
+      : [];
 
     const folderOperations = Array.isArray(parsed.folderOperations)
       ? parsed.folderOperations.map((op: Record<string, unknown>) => ({
@@ -108,7 +112,7 @@ export const organizeBookmarks = async (
   const resolvedTokens = maxOutputTokens ?? await lookupMaxOutputTokens(serviceId, modelId);
   const apiKey = await getApiKey(serviceId);
   
-  let userPrompt = buildBulkOrganizeUserPrompt(bookmarks, folderTree);
+  let userPrompt = buildBulkOrganizeUserPrompt(bookmarks, folderTree, userInstructions);
 
   if (userInstructions && userInstructions.trim()) {
     userPrompt += `\n\nIMPORTANT: Follow these additional user instructions for organization:\n"${userInstructions.trim()}"`;

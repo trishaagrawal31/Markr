@@ -16,15 +16,15 @@ const ChatTab = () => {
       role: 'assistant',
       content: `I'm Markr AI, your bookmark organization engine. I can handle five powerful operations:
 
-1. **Move Bookmarks** - Organize bookmarks into folders (existing or new)
-2. **Create Folders** - Set up new folder structures as needed
-3. **Unpack Folders** - Move folder contents to parent and delete the empty folder
-4. **Delete Folders** - Remove folders and their contents
-5. **Smart Filtering** - Handle specific sub-selections by criteria (React, design, tools, etc.)
+1. Move Bookmarks - Organize bookmarks into folders (existing or new)
+2. Create Folders - Set up new folder structures as needed
+3. Unpack Folders - Move folder contents to parent and delete the empty folder
+4. Delete Folders - Remove folders and their contents
+5. Smart Filtering - Handle specific sub-selections by criteria (React, design, tools, etc.)
 
-💡 **Pro Tip:** I can also answer simple questions about Markr itself, such as "who is Markr" or "what does it do".
+💡 Pro Tip: I can also answer simple questions about Markr itself, such as "who is Markr" or "what does it do".
 
-I can also organize your **open tabs** directly! Just ask:
+I can also organize your open tabs directly! Just ask:
 - "Save these open tabs" → Bookmarks all tabs to a folder
 - "Organize my tabs into Projects" → Categorizes tabs intelligently
 - "Save and organize coding tabs" → Saves matching tabs to your setup
