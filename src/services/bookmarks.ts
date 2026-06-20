@@ -108,21 +108,30 @@ export const deleteFolder = async (folderId: string): Promise<void> => {
   });
 };
 
+// chrome.bookmarks.get() does NOT include children, so fetch them explicitly.
+export const getBookmarkChildren = async (folderId: string): Promise<ChromeBookmarkNode[]> => {
+  return new Promise((resolve, reject) => {
+    chrome.bookmarks.getChildren(folderId, (children) => {
+      if (chrome.runtime.lastError) {
+        reject(new Error(chrome.runtime.lastError.message));
+        return;
+      }
+      resolve((children ?? []) as ChromeBookmarkNode[]);
+    });
+  });
+};
+
 export const unpacking = async (
   folderId: string,
   parentFolderId: string
 ): Promise<void> => {
-  const folder = await getBookmarkById(folderId);
-  if (!folder || !folder.children) {
-    throw new Error('Folder not found or has no contents');
-  }
-
-  // Move all children to parent folder
-  for (const child of folder.children) {
+  // Move every direct child (bookmarks and subfolders) up to the parent folder.
+  const children = await getBookmarkChildren(folderId);
+  for (const child of children) {
     await moveBookmark(child.id, parentFolderId);
   }
 
-  // Delete the now-empty folder
+  // Delete the now-empty folder.
   await deleteFolder(folderId);
 };
 
