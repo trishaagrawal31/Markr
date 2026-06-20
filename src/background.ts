@@ -1,18 +1,14 @@
-﻿import { type OrganizeMessage, type StartOrganizePayload, type ChatRequestPayload } from './types/messaging';
+import { type OrganizeMessage, type StartOrganizePayload, type ChatRequestPayload } from './types/messaging';
 import { type OrganizeSession } from './types/organize';
 import { organizeBookmarks } from './services/ai/bulkOrganize';
 import { saveOrganizeSession, loadOrganizeSession, getInitialSession } from './services/organizeSession';
 import { type ActionPreviewData, type ChatResponsePayload, type ApplyChatActionPayload } from './types/chat';
 import { moveBookmark, createFolderPath, getFullBookmarkLibrary, deleteFolder, unpacking, getBookmarkById, createBookmark } from './services/bookmarks';
 import { buildFullIdToPathMapFromTree, findFolderIdByAIPath } from './utils/folders';
-import { type BulkOrganizeResult } from './types/organize';
 import { queryAI } from './services/ai';
 
 const KEEPALIVE_ALARM_NAME = 'organize-keepalive';
 const KEEPALIVE_INTERVAL_MINUTES = 0.4;
-
-// Store the last chat action result for applying changes
-let lastChatActionResult: BulkOrganizeResult | null = null;
 
 const notifyPopup = (type: string, payload?: unknown): void => {
   chrome.runtime.sendMessage({ type, payload }).catch(() => {
@@ -54,6 +50,47 @@ const buildActionPreviewFromResult = (
     summary: result.folderPlan.summary,
     canApprove: affectedBookmarks.length > 0 || (folderOperations?.length ?? 0) > 0,
   };
+};
+
+// Produce an accurate, actionable error message instead of a single generic string.
+const friendlyErrorMessage = (error: unknown): string => {
+  if (!(error instanceof Error)) {
+    return 'Something went wrong. Please try again.';
+  }
+
+  const msg = error.message.toLowerCase();
+
+  if (msg.includes('401') || msg.includes('unauthorized') || msg.includes('invalid api key') || msg.includes('api key')) {
+    return 'Authentication failed. Please check your API key in settings and try again.';
+  }
+  if (msg.includes('429') || msg.includes('quota') || msg.includes('rate limit')) {
+    return 'Rate limit reached. Please wait a moment and try again.';
+  }
+  if (msg.includes('503') || msg.includes('unavailable') || msg.includes('high demand') || msg.includes('overloaded')) {
+    return 'The AI service is temporarily busy. Please try again in a few seconds.';
+  }
+  if (msg.includes('timed out') || msg.includes('timeout')) {
+    return 'The request timed out. Please try again.';
+  }
+  if (msg.includes('network') || msg.includes('failed to fetch')) {
+    return 'Network error. Please check your connection and try again.';
+  }
+  if (msg.includes('permission') || msg.includes('denied')) {
+    return 'Permission denied while updating bookmarks. Please check the extension permissions.';
+  }
+  if (msg.includes('parse') || msg.includes('json')) {
+    return "I couldn't understand the AI's response. Please try rephrasing your request.";
+  }
+  if (msg.includes('400') || msg.includes('bad request')) {
+    return 'The request was rejected by the AI service. Please try rephrasing your command.';
+  }
+
+  // Fall back to the real error message when it is short and meaningful.
+  if (error.message && error.message.length < 200) {
+    return error.message;
+  }
+
+  return 'Something went wrong. Please try again.';
 };
 
 const isTransientError = (error: unknown): boolean => {
@@ -137,24 +174,7 @@ const handleStartOrganize = async (payload: StartOrganizePayload): Promise<void>
   } catch (error) {
     chrome.alarms.clear(KEEPALIVE_ALARM_NAME);
 
-    let errorMessage = '❌ Invalid Request: The request was malformed. Please try rephrasing your command.';
-    if (error instanceof Error) {
-      const errMsg = error.message.toLowerCase();
-
-      if (errMsg.includes('503') || errMsg.includes('unavailable') || errMsg.includes('high demand')) {
-        errorMessage = '❌ Invalid Request: The request was malformed. Please try rephrasing your command.';
-      } else if (errMsg.includes('429') || errMsg.includes('quota') || errMsg.includes('rate limit')) {
-        errorMessage = '❌ Invalid Request: The request was malformed. Please try rephrasing your command.';
-      } else if (errMsg.includes('401') || errMsg.includes('unauthorized') || errMsg.includes('invalid api key')) {
-        errorMessage = '❌ Invalid Request: The request was malformed. Please try rephrasing your command.';
-      } else if (errMsg.includes('timed out')) {
-        errorMessage = '❌ Invalid Request: The request was malformed. Please try rephrasing your command.';
-      } else if (errMsg.includes('network') || errMsg.includes('failed to fetch')) {
-        errorMessage = '❌ Invalid Request: The request was malformed. Please try rephrasing your command.';
-      } else if (error.message.length < 200) {
-        errorMessage = '❌ Invalid Request: The request was malformed. Please try rephrasing your command.';
-      }
-    }
+    const errorMessage = friendlyErrorMessage(error);
 
     await persistError(errorMessage);
     notifyPopup('ORGANIZE_ERROR', { errorMessage });
@@ -305,9 +325,6 @@ const handleChatRequest = async (payload: ChatRequestPayload): Promise<void> => 
       )
     );
 
-    // Store result for later application
-    lastChatActionResult = result;
-
     // Build ActionPreviewData from result
     const actionPreview = buildActionPreviewFromResult(result);
 
@@ -324,49 +341,22 @@ const handleChatRequest = async (payload: ChatRequestPayload): Promise<void> => 
 
     notifyPopup('CHAT_RESPONSE', response);
   } catch (error) {
-    let errorMessage = '❌ Invalid Request: The request was malformed. Please try rephrasing your command.';
-
-    if (error instanceof Error) {
-      const errMsg = error.message.toLowerCase();
-
-      // Handle rate limit errors
-      if (errMsg.includes('503') || errMsg.includes('unavailable') || errMsg.includes('high demand')) {
-        errorMessage = '❌ Invalid Request: The request was malformed. Please try rephrasing your command.';
-      }
-      // Handle quota exceeded
-      else if (errMsg.includes('429') || errMsg.includes('quota') || errMsg.includes('rate limit')) {
-        errorMessage = '❌ Invalid Request: The request was malformed. Please try rephrasing your command.';
-      }
-      // Handle authentication errors
-      else if (errMsg.includes('401') || errMsg.includes('unauthorized') || errMsg.includes('invalid api key')) {
-        errorMessage = '❌ Invalid Request: The request was malformed. Please try rephrasing your command.';
-      }
-      // Handle invalid request
-      else if (errMsg.includes('400') || errMsg.includes('bad request')) {
-        errorMessage = '❌ Invalid Request: The request was malformed. Please try rephrasing your command.';
-      }
-      // Generic API errors
-      else if (errMsg.includes('api') || errMsg.includes('error')) {
-        errorMessage = `âš ï¸ API Error: ${error.message}`;
-      }
-      // Use original message if it's helpful
-      else if (error.message.length < 200) {
-        errorMessage = error.message;
-      }
-    }
-
+    const errorMessage = friendlyErrorMessage(error);
     notifyPopup('CHAT_ACTION_ERROR', { errorMessage });
   }
 };
 
 const handleApplyChatAction = async (payload: ApplyChatActionPayload): Promise<void> => {
-  if (!payload.actionPreview || !lastChatActionResult) {
-    throw new Error('No action preview or result data available');
+  // The action preview payload is fully self-contained, so we can apply it even
+  // if the service worker restarted and dropped the in-memory lastChatActionResult.
+  if (!payload.actionPreview) {
+    throw new Error('No action preview data available');
   }
 
   const { actionPreview } = payload;
   let appliedCount = 0;
   let skippedCount = 0;
+  let folderOpsApplied = 0;
 
   try {
     // Get current tree and build fresh maps
@@ -427,13 +417,15 @@ const handleApplyChatAction = async (payload: ApplyChatActionPayload): Promise<v
         const folderId = findFolderIdByAIPath(op.folderPath, updatedPathToIdMap);
         if (!folderId) {
           console.log(`[ApplyAction] Folder not found: ${op.folderPath}`);
+          skippedCount++;
           continue;
         }
 
         if (op.operation === 'delete') {
           console.log(`[ApplyAction] Deleting folder: ${op.folderPath}`);
           await deleteFolder(folderId);
-          console.log(`[ApplyAction] âœ“ Successfully deleted: ${op.folderPath}`);
+          console.log(`[ApplyAction] Successfully deleted: ${op.folderPath}`);
+          folderOpsApplied++;
         } else if (op.operation === 'unpack') {
           console.log(`[ApplyAction] Unpacking folder: ${op.folderPath}`);
           // Get the parent ID
@@ -442,10 +434,12 @@ const handleApplyChatAction = async (payload: ApplyChatActionPayload): Promise<v
             throw new Error(`Could not find parent for folder: ${op.folderPath}`);
           }
           await unpacking(folderId, folder.parentId);
-          console.log(`[ApplyAction] âœ“ Successfully unpacked: ${op.folderPath}`);
+          console.log(`[ApplyAction] Successfully unpacked: ${op.folderPath}`);
+          folderOpsApplied++;
         }
       } catch (error) {
         console.error(`[ApplyAction] Failed to ${op.operation} folder ${op.folderPath}:`, error);
+        skippedCount++;
       }
     }
 
@@ -539,27 +533,11 @@ const handleApplyChatAction = async (payload: ApplyChatActionPayload): Promise<v
       }
     }
 
-    // Clear stored result after applying
-    lastChatActionResult = null;
-
-    console.log(`[ApplyAction] âœ“ Complete: ${appliedCount} applied, ${skippedCount} skipped`);
-    notifyPopup('CHAT_ACTION_COMPLETE', { appliedCount, skippedCount });
+    console.log(`[ApplyAction] Complete: ${appliedCount} applied, ${folderOpsApplied} folder ops, ${skippedCount} skipped`);
+    notifyPopup('CHAT_ACTION_COMPLETE', { appliedCount, skippedCount, folderOpsCount: folderOpsApplied });
   } catch (error) {
     console.error('[ApplyAction] Critical error:', error);
-
-    let errorMessage = '❌ Invalid Request: The request was malformed. Please try rephrasing your command.';
-    if (error instanceof Error) {
-      const errMsg = error.message.toLowerCase();
-
-      if (errMsg.includes('permission') || errMsg.includes('denied')) {
-        errorMessage = '❌ Invalid Request: The request was malformed. Please try rephrasing your command.';
-      } else if (errMsg.includes('quota')) {
-        errorMessage = '❌ Invalid Request: The request was malformed. Please try rephrasing your command.';
-      } else if (error.message.length < 200) {
-        errorMessage = error.message;
-      }
-    }
-
+    const errorMessage = friendlyErrorMessage(error);
     notifyPopup('CHAT_ACTION_ERROR', { errorMessage });
   }
 };
@@ -581,20 +559,7 @@ chrome.runtime.onMessage.addListener(
           console.error('[Background] Error starting organize:', error);
           chrome.alarms.clear(KEEPALIVE_ALARM_NAME);
 
-          let errorMessage = '❌ Invalid Request: The request was malformed. Please try rephrasing your command.';
-          if (error instanceof Error) {
-            const errMsg = error.message.toLowerCase();
-            if (errMsg.includes('503') || errMsg.includes('unavailable') || errMsg.includes('high demand')) {
-              errorMessage = '❌ Invalid Request: The request was malformed. Please try rephrasing your command.';
-            } else if (errMsg.includes('429') || errMsg.includes('rate limit')) {
-              errorMessage = '❌ Invalid Request: The request was malformed. Please try rephrasing your command.';
-            } else if (errMsg.includes('401') || errMsg.includes('unauthorized')) {
-              errorMessage = '❌ Invalid Request: The request was malformed. Please try rephrasing your command.';
-            } else if (error.message.length < 200) {
-              errorMessage = error.message;
-            }
-          }
-
+          const errorMessage = friendlyErrorMessage(error);
           await persistError(errorMessage);
           notifyPopup('ORGANIZE_ERROR', { errorMessage });
         });
@@ -613,19 +578,7 @@ chrome.runtime.onMessage.addListener(
       case 'CHAT_REQUEST':
         handleChatRequest(message.payload as ChatRequestPayload).catch(async error => {
           console.error('[Background] Chat Error:', error);
-          let errorMessage = '❌ Invalid Request: The request was malformed. Please try rephrasing your command.';
-          if (error instanceof Error) {
-            const errMsg = error.message.toLowerCase();
-            if (errMsg.includes('503') || errMsg.includes('unavailable') || errMsg.includes('high demand')) {
-              errorMessage = '❌ Invalid Request: The request was malformed. Please try rephrasing your command.';
-            } else if (errMsg.includes('429') || errMsg.includes('rate limit')) {
-              errorMessage = '❌ Invalid Request: The request was malformed. Please try rephrasing your command.';
-            } else if (errMsg.includes('401') || errMsg.includes('unauthorized')) {
-              errorMessage = '❌ Invalid Request: The request was malformed. Please try rephrasing your command.';
-            } else if (error.message.length < 200) {
-              errorMessage = error.message;
-            }
-          }
+          const errorMessage = friendlyErrorMessage(error);
           notifyPopup('CHAT_ACTION_ERROR', { errorMessage });
         });
         sendResponse({ success: true });
@@ -634,7 +587,7 @@ chrome.runtime.onMessage.addListener(
       case 'APPLY_CHAT_ACTION':
         handleApplyChatAction(message.payload as ApplyChatActionPayload).catch(async error => {
           console.error('[Background] Apply Chat Action Error:', error);
-          const errorMessage = error instanceof Error ? error.message : 'Failed to apply changes.';
+          const errorMessage = friendlyErrorMessage(error);
           notifyPopup('CHAT_ACTION_ERROR', { errorMessage });
         });
         sendResponse({ success: true });

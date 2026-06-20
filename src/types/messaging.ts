@@ -59,6 +59,7 @@ export interface ApplyChatActionMessage {
 export interface ChatActionCompletePayload {
   appliedCount: number;
   skippedCount: number;
+  folderOpsCount?: number;
 }
 
 export interface ChatActionErrorPayload {
