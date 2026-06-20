@@ -34,10 +34,10 @@ const MainContent = ({
         <div className="main-header-left">
           <img
             src="/assets/icons/icon48.png"
-            alt="MarkMind"
+            alt="Markr"
             className="main-header-logo"
           />
-          <h1 className="main-header-title">MarkMind</h1>
+          <h1 className="main-header-title">Markr</h1>
         </div>
         {onToggleTheme && (
           <div className="main-header-right">
