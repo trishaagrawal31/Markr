@@ -16,23 +16,20 @@ Markr is a Manifest V3 browser extension that brings AI to your bookmarks. Inste
 
 You bring your own AI provider key. Markr never ships your data to a server we control — requests go directly from your browser to the provider you choose, and your keys live in local extension storage.
 
-![Markr demo](./assets/readme/demo.gif)
+
 
 ## Features
 
 - **One-click page filing** — Open the popup on any page and Markr suggests the best existing folder (or proposes a new one) for the current tab.
 - **Bulk organize** — Scan your whole bookmark library and let the AI propose a clean, reviewable folder structure before anything changes.
 
-  ![Bulk organize](./assets/readme/bulk.gif)
 
 - **AI chat** — Ask questions like "find my React articles" or "organize my open tabs." The chat only touches open tabs when you explicitly ask it to; otherwise it works against your saved bookmarks.
 - **You stay in control** — Every change is presented as a reviewable plan. Nothing is moved, renamed, or deleted without your confirmation.
 
-  ![Review and control](./assets/readme/control.gif)
 
 - **Private by design** — Bring your own API key. Keys and preferences are stored in local browser storage, and AI requests go straight to your chosen provider.
 
-  ![Privacy](./assets/readme/private.gif)
 
 ## Supported AI providers
 
