@@ -67,12 +67,28 @@ Just describe what you want, and I'll generate a precise preview for your approv
           setPendingAction(actionPreview);
         }
       } else if (message.type === 'CHAT_ACTION_COMPLETE') {
-        const { appliedCount, skippedCount } = message.payload;
+        const { appliedCount, skippedCount, folderOpsCount = 0 } = message.payload;
+
+        const parts: string[] = [];
+        if (appliedCount > 0) {
+          parts.push(`moved ${appliedCount} bookmark${appliedCount !== 1 ? 's' : ''}`);
+        }
+        if (folderOpsCount > 0) {
+          parts.push(`updated ${folderOpsCount} folder${folderOpsCount !== 1 ? 's' : ''}`);
+        }
+
+        const summary =
+          parts.length > 0
+            ? `✅ Changes applied! I ${parts.join(' and ')}${
+                skippedCount > 0 ? ` (${skippedCount} couldn't be completed)` : ''
+              }.`
+            : skippedCount > 0
+              ? `⚠️ Nothing was changed — ${skippedCount} item${skippedCount !== 1 ? 's' : ''} couldn't be completed. Please try rephrasing your request.`
+              : `✅ All done — there was nothing to change.`;
+
         const successMsg: ChatMessage = {
           role: 'assistant',
-          content: `✅ Changes applied! Moved ${appliedCount} bookmark${appliedCount !== 1 ? 's' : ''}${
-            skippedCount > 0 ? ` (${skippedCount} couldn't be moved)` : ''
-          }.`,
+          content: summary,
           timestamp: Date.now(),
           status: 'complete',
           modelIndicator: activeModel || undefined,
