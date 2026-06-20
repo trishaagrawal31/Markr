@@ -1,5 +1,5 @@
 import { type OrganizeMessage, type StartOrganizePayload, type ChatRequestPayload } from './types/messaging';
-import { type OrganizeSession } from './types/organize';
+import { type OrganizeSession, type CompactBookmark } from './types/organize';
 import { organizeBookmarks } from './services/ai/bulkOrganize';
 import { saveOrganizeSession, loadOrganizeSession, getInitialSession } from './services/organizeSession';
 import { type ActionPreviewData, type ChatResponsePayload, type ApplyChatActionPayload } from './types/chat';
@@ -278,18 +278,6 @@ const handleChatRequest = async (payload: ChatRequestPayload): Promise<void> => 
     // Get ALL bookmarks in the library
     const allBookmarks = await getFullBookmarkLibrary();
 
-    // Also get open tabs for context - query ALL windows, not just current
-    const tabs = await chrome.tabs.query({});
-    const openTabBookmarks = tabs
-      .filter(t => t.url && !t.url.startsWith('chrome://') && !t.url.startsWith('edge://') && !t.url.startsWith('about:'))
-      .map(t => ({
-        id: `tab-${t.id}`,
-        title: t.title || 'Untitled Tab',
-        url: t.url || '',
-        currentFolderPath: 'Open Tabs',
-        currentFolderId: 'root',
-      }));
-
     // Build folder structure info
     const pathToIdMap: Record<string, string> = {};
     const idToPathMap = buildFullIdToPathMapFromTree(tree);
@@ -304,13 +292,41 @@ const handleChatRequest = async (payload: ChatRequestPayload): Promise<void> => 
       // Ignore tree serialization errors
     }
 
-    // If the user explicitly mentions "open tabs", focus on those
-    // Otherwise, search through entire bookmark library + open tabs
-    const includeOpenTabsOnly =
-      payload.message.toLowerCase().includes('open') &&
-      payload.message.toLowerCase().includes('tabs');
+    // Open tabs should ONLY be considered when the user explicitly asks for them.
+    // Detect an explicit mention of tab(s) in the request.
+    const lowerMsg = payload.message.toLowerCase();
+    const mentionsTabs = /\btabs?\b/.test(lowerMsg);
+    const mentionsBookmarks = /\bbookmarks?\b/.test(lowerMsg);
 
-    const bookmarksToAnalyze = includeOpenTabsOnly ? openTabBookmarks : [...allBookmarks, ...openTabBookmarks];
+    // Only query open tabs when the user explicitly references tabs.
+    let openTabBookmarks: CompactBookmark[] = [];
+
+    if (mentionsTabs) {
+      // Query ALL windows, not just the current one
+      const tabs = await chrome.tabs.query({});
+      openTabBookmarks = tabs
+        .filter(t => t.url && !t.url.startsWith('chrome://') && !t.url.startsWith('edge://') && !t.url.startsWith('about:'))
+        .map(t => ({
+          id: `tab-${t.id}`,
+          title: t.title || 'Untitled Tab',
+          url: t.url || '',
+          currentFolderPath: 'Open Tabs',
+          currentFolderId: 'root',
+        }));
+    }
+
+    // Decide what to analyze:
+    // - "tabs" only            -> open tabs only
+    // - "tabs" AND "bookmarks" -> both
+    // - neither/just bookmarks -> existing bookmark library only (never open tabs)
+    let bookmarksToAnalyze: CompactBookmark[];
+    if (mentionsTabs && mentionsBookmarks) {
+      bookmarksToAnalyze = [...allBookmarks, ...openTabBookmarks];
+    } else if (mentionsTabs) {
+      bookmarksToAnalyze = openTabBookmarks;
+    } else {
+      bookmarksToAnalyze = allBookmarks;
+    }
 
     // Call AI with the comprehensive context and automatic retry on transient errors
     const result = await retryWithBackoff(() =>
