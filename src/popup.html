@@ -4,7 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Markr</title>
-    <script src="/theme-init.js" data-vite-ignore></script>
+    <script>
+      /* Apply the saved theme before paint to avoid a flash of the wrong theme */
+      (function () {
+        try {
+          var saved = localStorage.getItem("themePreference");
+          document.documentElement.setAttribute(
+            "data-theme",
+            saved === "light" ? "light" : "dark"
+          );
+        } catch (e) {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
