@@ -14,22 +14,8 @@ const ChatTab = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
-      content: `I'm Markr AI, your bookmark organization engine. I can handle five powerful operations:
-
-1. Move Bookmarks - Organize bookmarks into folders (existing or new)
-2. Create Folders - Set up new folder structures as needed
-3. Unpack Folders - Move folder contents to parent and delete the empty folder
-4. Delete Folders - Remove folders and their contents
-5. Smart Filtering - Handle specific sub-selections by criteria (React, design, tools, etc.)
-
-💡 Pro Tip: I can also answer simple questions about Markr itself, such as "who is Markr" or "what does it do".
-
-I can also organize your open tabs directly! Just ask:
-- "Save these open tabs" → Bookmarks all tabs to a folder
-- "Organize my tabs into Projects" → Categorizes tabs intelligently
-- "Save and organize coding tabs" → Saves matching tabs to your setup
-
-Just describe what you want, and I'll generate a precise preview for your approval before making changes.`,
+      content: `I'm Markr, your bookmark organization engine. 
+      Just tell me what you want to clean up whether it's moving bookmarks, filtering by topic, or organizing open tabs and I'll show you a preview before making any changes.`,
       timestamp: Date.now(),
       status: 'complete',
     },
