@@ -22,12 +22,8 @@ You bring your own AI provider key. Markr never ships your data to a server we c
 
 - **One-click page filing** — Open the popup on any page and Markr suggests the best existing folder (or proposes a new one) for the current tab.
 - **Bulk organize** — Scan your whole bookmark library and let the AI propose a clean, reviewable folder structure before anything changes.
-
-
 - **AI chat** — Ask questions like "find my React articles" or "organize my open tabs." The chat only touches open tabs when you explicitly ask it to; otherwise it works against your saved bookmarks.
 - **You stay in control** — Every change is presented as a reviewable plan. Nothing is moved, renamed, or deleted without your confirmation.
-
-
 - **Private by design** — Bring your own API key. Keys and preferences are stored in local browser storage, and AI requests go straight to your chosen provider.
 
 
